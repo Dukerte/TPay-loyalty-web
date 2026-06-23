@@ -1,0 +1,996 @@
+<!DOCTYPE html>
+<html lang="mn">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TPay Loyalty – Дэлгэр Зуны Бэлэгтэй Аян</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --blue-dark: #0a1f6e;
+      --blue:      #1a3bbf;
+      --blue-btn:  #2555f0;
+      --green:     #2ec65a;
+      --orange:    #f5832e;
+      --yellow:    #f5c400;
+      --bg:        #f4f6fb;
+      --white:     #ffffff;
+      --text:      #1a1a2e;
+      --muted:     #6b7280;
+      --radius:    16px;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* ══════════════════════════════
+       NAVBAR
+    ══════════════════════════════ */
+    nav {
+      background: var(--white);
+      border-bottom: 1px solid #e8eaf0;
+      position: sticky; top: 0; z-index: 200;
+    }
+    .nav-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 24px;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      gap: 36px;
+    }
+    .nav-logo { display: flex; align-items: center; gap: 8px; text-decoration: none; }
+    .nav-logo img { height: 32px; width: auto; }
+    .nav-links {
+      display: flex;
+      gap: 4px;
+      flex: 1;
+    }
+    .nav-links a {
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--muted);
+      padding: 6px 14px;
+      border-radius: 8px;
+      transition: color .15s, background .15s;
+      white-space: nowrap;
+    }
+    .nav-links a:hover { color: var(--blue); background: #eef2ff; }
+    .nav-links a.active {
+      color: var(--blue);
+      font-weight: 700;
+      border-bottom: 2px solid var(--blue);
+      border-radius: 0;
+    }
+    .nav-url {
+      font-size: 13px;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-left: auto;
+    }
+    .nav-url svg { flex-shrink: 0; }
+
+    /* ══════════════════════════════
+       HERO BANNER
+    ══════════════════════════════ */
+    .hero {
+      /* fallback gradient shown while robot-bg.png loads */
+      background:
+        url('robot-bg.png') center center / cover no-repeat,
+        linear-gradient(135deg, #0a2080 0%, #1848cc 60%, #3d8ef5 100%);
+      min-height: 400px;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+    }
+    .hero-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 52px 24px 56px;
+      width: 100%;
+      position: relative;
+      z-index: 2;
+    }
+    /* Text sits on left ~55%, robot fills right naturally from bg image */
+    .hero-text {
+      width: 55%;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0;
+    }
+    .hero-title-img {
+      width: min(480px, 100%);
+      height: auto;
+      display: block;
+      margin-bottom: 12px;
+      filter: drop-shadow(0 4px 20px rgba(0,0,0,0.35));
+    }
+    .hero-subtitle-img {
+      width: min(340px, 85%);
+      height: auto;
+      display: block;
+      filter: drop-shadow(0 2px 8px rgba(0,0,0,0.25));
+    }
+    @media (max-width: 700px) {
+      .hero-text { width: 100%; align-items: center; }
+      .hero-title-img, .hero-subtitle-img { width: min(320px, 90vw); }
+    }
+
+    /* ══════════════════════════════
+       MAIN CONTENT WRAPPER
+    ══════════════════════════════ */
+    .content {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 24px 60px;
+    }
+
+    /* ══════════════════════════════
+       CAMPAIGN CARDS
+    ══════════════════════════════ */
+    .campaigns {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-top: -32px;
+      position: relative;
+      z-index: 10;
+    }
+    .c-card {
+      background: var(--white);
+      border-radius: var(--radius);
+      padding: 22px 20px 20px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.10);
+      border-top: 4px solid transparent;
+      transition: transform .2s, box-shadow .2s;
+    }
+    .c-card:hover { transform: translateY(-4px); box-shadow: 0 12px 36px rgba(0,0,0,0.13); }
+    .c-card.green  { border-top-color: var(--green); }
+    .c-card.blue   { border-top-color: var(--blue); }
+    .c-card.orange { border-top-color: var(--orange); }
+
+    .c-pill {
+      display: inline-flex; align-items: center;
+      border-radius: 50px;
+      padding: 3px 12px;
+      font-size: 12px; font-weight: 700;
+      margin-bottom: 14px;
+    }
+    .pill-green  { background: #e8fff0; color: #0a7a2e; border: 1.5px solid var(--green); }
+    .pill-blue   { background: #eef2ff; color: var(--blue); border: 1.5px solid var(--blue); }
+    .pill-orange { background: #fff3ed; color: #b84000; border: 1.5px solid var(--orange); }
+
+    .c-icon {
+      width: 52px; height: 52px; border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 14px;
+    }
+    .ci-green  { background: #e8fff0; }
+    .ci-blue   { background: #eef2ff; }
+    .ci-orange { background: #fff3ed; }
+
+    .c-card h3 { font-size: 16px; font-weight: 800; color: var(--blue-dark); margin-bottom: 8px; }
+    .c-card p  { font-size: 13px; color: var(--muted); line-height: 1.6; margin-bottom: 16px; }
+
+    .c-date {
+      display: inline-flex; align-items: center; gap: 6px;
+      border-radius: 50px; padding: 5px 14px;
+      font-size: 12px; font-weight: 700;
+    }
+    .cd-green  { background: #e8fff0; color: #0a7a2e; border: 1px solid var(--green); }
+    .cd-blue   { background: #eef2ff; color: var(--blue); border: 1px solid var(--blue); }
+    .cd-orange { background: #fff3ed; color: #b84000; border: 1px solid var(--orange); }
+
+    /* ══════════════════════════════
+       STATS BANNER
+    ══════════════════════════════ */
+    .stats-banner {
+      margin-top: 20px;
+      background: linear-gradient(135deg, #0a1f6e, #1a3bbf);
+      border-radius: 16px;
+      padding: 0 4px;
+      overflow: hidden;
+      box-shadow: 0 4px 20px rgba(26,59,191,0.25);
+    }
+    .stats-inner {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 0;
+      padding: 16px 24px;
+    }
+    .stats-item {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      color: rgba(255,255,255,0.85);
+      font-size: 14px;
+      padding: 4px 20px;
+      white-space: nowrap;
+    }
+    .stats-item strong {
+      color: #fff;
+      font-size: 20px;
+      font-weight: 900;
+      letter-spacing: -0.5px;
+    }
+    .stats-highlight {
+      color: #fff;
+      font-weight: 600;
+    }
+    .stats-highlight strong {
+      color: #7bffb0;
+      font-size: 26px;
+    }
+    .stats-divider {
+      width: 1px;
+      height: 32px;
+      background: rgba(255,255,255,0.2);
+      flex-shrink: 0;
+    }
+    @media (max-width: 700px) {
+      .stats-inner { flex-direction: column; gap: 8px; padding: 16px; }
+      .stats-divider { width: 80%; height: 1px; }
+      .stats-item { padding: 2px 0; }
+    }
+
+    /* ══════════════════════════════
+       LOOKUP CARD
+    ══════════════════════════════ */
+    .lookup-section { margin-top: 28px; }
+    .lookup-card {
+      background: var(--white);
+      border-radius: 20px;
+      padding: 32px 36px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+      display: flex;
+      align-items: center;
+      gap: 32px;
+    }
+    .lookup-gift { flex-shrink: 0; }
+    .lookup-gift img { width: 100px; height: auto; display: block; }
+    .lookup-gift-placeholder {
+      width: 90px; height: 90px;
+      background: linear-gradient(135deg, #eef2ff, #dce5ff);
+      border-radius: 20px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 44px;
+    }
+    .lookup-body { flex: 1; min-width: 0; }
+    .lookup-body h2 { font-size: 20px; font-weight: 800; color: var(--blue-dark); margin-bottom: 4px; }
+    .lookup-body p  { font-size: 14px; color: var(--muted); margin-bottom: 16px; }
+    .lookup-row {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+    .phone-prefix-box {
+      display: flex; align-items: center; gap: 6px;
+      border: 2px solid #e0e5f0;
+      border-radius: 12px;
+      padding: 0 14px;
+      height: 52px;
+      font-size: 14px; font-weight: 600;
+      color: var(--text);
+      background: #f7f9ff;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    input[type="tel"] {
+      flex: 1;
+      height: 52px;
+      padding: 0 16px;
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      border: 2px solid #e0e5f0;
+      border-radius: 12px;
+      outline: none;
+      color: var(--text);
+      background: #f7f9ff;
+      font-family: 'Inter', sans-serif;
+      transition: border .2s, background .2s;
+      min-width: 0;
+    }
+    input[type="tel"]:focus { border-color: var(--blue-btn); background: #fff; }
+    input[type="tel"]::placeholder { color: #bbb; font-weight: 400; letter-spacing: 0; font-size: 15px; }
+    .btn-check {
+      height: 52px;
+      padding: 0 28px;
+      background: var(--blue-btn);
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+      flex-shrink: 0;
+      font-family: 'Inter', sans-serif;
+      transition: opacity .15s, transform .1s;
+    }
+    .btn-check:hover  { opacity: 0.88; }
+    .btn-check:active { transform: scale(0.97); }
+    .btn-check:disabled { opacity: .6; cursor: not-allowed; }
+
+    .privacy-note {
+      margin-top: 10px;
+      font-size: 12px;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Result */
+    #result { margin-top: 20px; display: none; }
+    .result-found {
+      background: linear-gradient(135deg, #e8fff0, #d0fae4);
+      border: 2px solid var(--green);
+      border-radius: 14px;
+      padding: 20px 24px;
+      text-align: center;
+    }
+    .result-found .r-icon { font-size: 40px; margin-bottom: 8px; }
+    .result-found h3 { font-size: 17px; font-weight: 800; color: #0a7a2e; margin-bottom: 4px; }
+    .ticket-count { font-size: 52px; font-weight: 900; color: #0a7a2e; line-height: 1; margin: 6px 0 2px; }
+    .ticket-label { font-size: 14px; font-weight: 600; color: #1a8a40; }
+    .phone-disp   { margin-top: 10px; font-size: 13px; color: #555; }
+
+    .result-not-found {
+      background: linear-gradient(135deg, #fff5f0, #ffe8de);
+      border: 2px solid var(--orange);
+      border-radius: 14px;
+      padding: 20px 24px;
+      text-align: center;
+    }
+    .result-not-found .r-icon { font-size: 34px; margin-bottom: 8px; }
+    .result-not-found h3 { font-size: 15px; font-weight: 800; color: #8a3800; margin-bottom: 10px; }
+    .campaign-dates {
+      display: flex; flex-direction: column; gap: 7px;
+      text-align: left;
+      background: rgba(255,255,255,0.65);
+      border-radius: 10px;
+      padding: 12px 14px;
+    }
+    .date-row { font-size: 13px; color: #5a2800; display: flex; gap: 8px; align-items: flex-start; }
+    .date-row strong { color: #8a3800; }
+
+    .result-error {
+      background: #fff3cd; border: 2px solid var(--yellow);
+      border-radius: 14px; padding: 14px 18px;
+      text-align: center; font-size: 14px; color: #7a5a00;
+    }
+
+    /* ══════════════════════════════
+       PRIZES SECTION
+    ══════════════════════════════ */
+    .prizes-section { margin-top: 36px; }
+    .section-header {
+      display: flex; align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+    .section-title {
+      font-size: 20px; font-weight: 800; color: var(--blue-dark);
+      display: flex; align-items: center; gap: 8px;
+    }
+    .see-all {
+      font-size: 14px; font-weight: 600; color: var(--blue-btn);
+      text-decoration: none;
+      display: flex; align-items: center; gap: 4px;
+    }
+    .see-all:hover { text-decoration: underline; }
+
+    .prizes-strip {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 12px;
+    }
+    .prize-card {
+      background: var(--white);
+      border-radius: 14px;
+      padding: 16px 12px 14px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+      text-align: center;
+      transition: transform .18s, box-shadow .18s;
+      position: relative;
+      cursor: default;
+    }
+    .prize-card:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(0,0,0,0.12); }
+    .prize-card.has-tooltip { cursor: pointer; }
+
+    .prize-emoji { font-size: 40px; display: block; margin-bottom: 8px; }
+    .prize-svg-icon { display: flex; justify-content: center; margin-bottom: 8px; }
+    .prize-name  { font-size: 12px; font-weight: 700; color: var(--blue-dark); line-height: 1.4; margin-bottom: 6px; }
+    .prize-qty {
+      position: absolute; bottom: 10px; right: 12px;
+      font-size: 11px; font-weight: 700;
+      background: #eef2ff; color: var(--blue);
+      border-radius: 50px; padding: 2px 8px;
+    }
+
+    /* Camping tooltip */
+    .prize-tooltip {
+      display: none;
+      position: absolute;
+      bottom: calc(100% + 12px);
+      left: 50%; transform: translateX(-50%);
+      background: rgba(10,25,80,0.97);
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 14px;
+      padding: 14px 16px;
+      width: 270px;
+      z-index: 100;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.35);
+      pointer-events: none;
+      text-align: left;
+    }
+    .prize-tooltip::after {
+      content: '';
+      position: absolute;
+      top: 100%; left: 50%; transform: translateX(-50%);
+      border: 8px solid transparent;
+      border-top-color: rgba(10,25,80,0.97);
+    }
+    .prize-tooltip h5 {
+      font-size: 11px; font-weight: 700;
+      color: #a0c4ff; margin-bottom: 8px;
+      text-transform: uppercase; letter-spacing: .5px;
+    }
+    .prize-tooltip ul { list-style: none; display: flex; flex-direction: column; gap: 5px; }
+    .prize-tooltip ul li {
+      font-size: 12px; color: rgba(255,255,255,.9);
+      display: flex; gap: 7px; line-height: 1.4;
+    }
+    .prize-tooltip ul li span.ti { flex-shrink: 0; }
+
+    .hint-badge {
+      position: absolute; top: 7px; right: 8px;
+      font-size: 9px; background: #eef2ff;
+      color: var(--blue); border-radius: 50px; padding: 2px 6px;
+      font-weight: 600;
+    }
+
+    .prize-card.has-tooltip:hover .prize-tooltip,
+    .prize-card.has-tooltip.active .prize-tooltip { display: block; }
+
+    /* ══════════════════════════════
+       INFO CARDS (3 bottom)
+    ══════════════════════════════ */
+    .info-section { margin-top: 28px; }
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+    }
+    .info-card {
+      background: var(--white);
+      border-radius: 14px;
+      padding: 20px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      cursor: pointer;
+      text-decoration: none;
+      transition: box-shadow .18s, transform .18s;
+      color: var(--text);
+    }
+    .info-card:hover { box-shadow: 0 6px 24px rgba(0,0,0,0.12); transform: translateY(-2px); }
+    .info-icon-wrap {
+      width: 52px; height: 52px; border-radius: 14px; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      background: var(--blue-btn);
+    }
+    .info-body { flex: 1; min-width: 0; }
+    .info-body h4 { font-size: 14px; font-weight: 700; color: var(--blue-dark); margin-bottom: 3px; }
+    .info-body p  { font-size: 12px; color: var(--muted); line-height: 1.5; }
+    .info-arrow { color: var(--muted); flex-shrink: 0; }
+
+    /* ══════════════════════════════
+       FOOTER
+    ══════════════════════════════ */
+    footer {
+      text-align: center;
+      padding: 24px;
+      font-size: 13px;
+      color: var(--muted);
+      border-top: 1px solid #e8eaf0;
+      margin-top: 8px;
+    }
+
+    /* ══════════════════════════════
+       SPINNER
+    ══════════════════════════════ */
+    .spinner {
+      display: inline-block;
+      width: 16px; height: 16px;
+      border: 3px solid rgba(255,255,255,.4);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin .7s linear infinite;
+      vertical-align: middle;
+      margin-right: 6px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ══════════════════════════════
+       RESPONSIVE
+    ══════════════════════════════ */
+    @media (max-width: 900px) {
+      .prizes-strip { grid-template-columns: repeat(3, 1fr); }
+    }
+    @media (max-width: 700px) {
+      .campaigns { grid-template-columns: 1fr; margin-top: -16px; }
+      .lookup-card { flex-direction: column; padding: 24px 20px; gap: 20px; text-align: center; }
+      .lookup-gift { display: none; }
+      .lookup-row  { flex-wrap: wrap; }
+      .btn-check   { width: 100%; }
+      .info-grid   { grid-template-columns: 1fr; }
+      .prizes-strip { grid-template-columns: repeat(2, 1fr); }
+      .nav-links   { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── NAVBAR ── -->
+<nav>
+  <div class="nav-inner">
+    <a href="#" class="nav-logo">
+      <img src="TPay logo.png" alt="TPay" onerror="this.style.display='none';this.nextSibling.style.display='flex'" />
+      <span style="display:none;align-items:center;gap:6px;font-size:18px;font-weight:900;color:#1a3bbf;">
+        <span style="background:#1a3bbf;color:#fff;border-radius:8px;width:32px;height:32px;display:flex;align-items:center;justify-content:center;font-size:16px;">T</span>
+        TPay
+      </span>
+    </a>
+    <div class="nav-links">
+      <a href="#">Нүүр</a>
+      <a href="#campaigns" class="active">Аян</a>
+      <a href="#lookup">Сугалааны эрх шалгах</a>
+      <a href="#faq">Түгээмэл асуулт</a>
+    </div>
+    <div class="nav-url">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+      loyalty.tpay.mn
+    </div>
+  </div>
+</nav>
+
+<!-- ── HERO BANNER ── -->
+<section class="hero">
+  <div class="hero-inner">
+    <div class="hero-text">
+      <img
+        src="Campaign title - typo.png"
+        alt="Дэлгэр Зуны Бэлэгтэй Аян"
+        class="hero-title-img"
+        onerror="this.style.display='none'"
+      />
+      <img
+        src="Aztan bolooroi typo.png"
+        alt="Зунжингаа оролцоод сар бүр азтан болоорой"
+        class="hero-subtitle-img"
+        onerror="this.style.display='none'"
+      />
+    </div>
+  </div>
+</section>
+
+<!-- ── MAIN CONTENT ── -->
+<div class="content">
+
+  <!-- Campaign Cards -->
+  <div class="campaigns" id="campaigns">
+
+    <div class="c-card green">
+      <span class="c-pill pill-green">6-р сар</span>
+      <div class="c-icon ci-green">
+        <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+          <circle cx="14" cy="14" r="10" fill="#2ec65a" opacity=".15"/>
+          <path d="M14 7v14M7 14h14" stroke="#2ec65a" stroke-width="2.5" stroke-linecap="round"/>
+          <circle cx="14" cy="14" r="3" fill="#2ec65a"/>
+        </svg>
+      </div>
+      <h3>Шинэ зээлийн аян</h3>
+      <p>06.20–07.05 хооронд <strong>шинэ зээл</strong> авах бүрт сугалааны эрх дагалдана.</p>
+      <span class="c-date cd-green">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+        06.20 – 07.05
+      </span>
+    </div>
+
+    <div class="c-card blue">
+      <span class="c-pill pill-blue">7-р сар</span>
+      <div class="c-icon ci-blue">
+        <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+          <path d="M5 14a9 9 0 0 1 15.36-6.36L22 6" stroke="#1a3bbf" stroke-width="2.3" stroke-linecap="round"/>
+          <path d="M22 6v4.5H17.5" stroke="#1a3bbf" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M23 14a9 9 0 0 1-15.36 6.36L6 22" stroke="#1a3bbf" stroke-width="2.3" stroke-linecap="round"/>
+          <path d="M6 22v-4.5H10.5" stroke="#1a3bbf" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <h3>Эргэн төлөлтийн аян</h3>
+      <p>07.06–07.31 хооронд зээлийн <strong>эргэн төлөлт</strong> бүрт сугалааны эрх дагалдана.</p>
+      <span class="c-date cd-blue">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+        07.06 – 07.31
+      </span>
+    </div>
+
+    <div class="c-card orange">
+      <span class="c-pill pill-orange">8-р сар</span>
+      <div class="c-icon ci-orange">
+        <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+          <rect x="5" y="9" width="18" height="13" rx="3" stroke="#f5832e" stroke-width="2.3"/>
+          <path d="M10 9V7.5a4 4 0 0 1 8 0V9" stroke="#f5832e" stroke-width="2.3" stroke-linecap="round"/>
+          <path d="M11 16l2 2 4-4" stroke="#f5832e" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <h3>Давтан зээлийн аян</h3>
+      <p>08.01–08.21 хооронд <strong>давтан зээл</strong> авах бүрт сугалааны эрх дагалдана.</p>
+      <span class="c-date cd-orange">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+        08.01 – 08.21
+      </span>
+    </div>
+
+  </div><!-- /campaigns -->
+
+  <!-- Live Stats Banner -->
+  <div class="stats-banner" id="statsBanner" style="display:none;">
+    <div class="stats-inner">
+      <div class="stats-item">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+        <span id="statsDate">...</span>-ны байдлаар
+      </div>
+      <div class="stats-divider"></div>
+      <div class="stats-item stats-highlight">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        <span>Сугалааны эрх бүртгүүлсэн:</span>
+        <strong id="statsCount">—</strong> харилцагч
+      </div>
+      <div class="stats-divider"></div>
+      <div class="stats-item">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M15 6l-6 6 6 6"/><rect x="3" y="3" width="4" height="18" rx="1"/></svg>
+        <span>Нийт сугалааны эрх:</span>
+        <strong id="statsTotal">—</strong>
+      </div>
+    </div>
+  </div>
+
+  <!-- Lookup -->
+  <section class="lookup-section" id="lookup">
+    <div class="lookup-card">
+      <div class="lookup-gift">
+        <div class="lookup-gift-placeholder">🎁</div>
+      </div>
+      <div class="lookup-body">
+        <h2>Сугалааны эрх шалгах</h2>
+        <p>Бүртгэлтэй утасны дугаараа оруулна уу</p>
+        <div class="lookup-row">
+          <div class="phone-prefix-box">
+            🇲🇳 +976
+          </div>
+          <input
+            type="tel"
+            id="phoneInput"
+            maxlength="8"
+            placeholder="8 оронтой дугаар"
+            inputmode="numeric"
+            pattern="[0-9]{8}"
+            autocomplete="tel"
+          />
+          <button class="btn-check" id="checkBtn" onclick="checkRaffle()">Шалгах</button>
+        </div>
+        <div class="privacy-note">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          Таны мэдээлэл 100% хамгаалагдана.
+        </div>
+        <div id="result"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Prizes -->
+  <section class="prizes-section">
+    <div class="section-header">
+      <div class="section-title">🎁 6-р сарын шагналын сан</div>
+      <a href="#" class="see-all">Бүх шагналыг үзэх →</a>
+    </div>
+    <div class="prizes-strip">
+
+      <!-- Camping — with tooltip -->
+      <div class="prize-card has-tooltip" id="campingCard">
+        <div class="prize-svg-icon">
+          <!-- Tent icon -->
+          <svg width="44" height="44" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect width="44" height="44" rx="12" fill="#FFF3E0"/>
+            <path d="M8 34L22 12L36 34H8Z" fill="#FF8C00" opacity=".2"/>
+            <path d="M8 34L22 12L36 34" stroke="#E65100" stroke-width="2" stroke-linejoin="round"/>
+            <path d="M14 34L22 20L30 34" stroke="#FF8C00" stroke-width="2" stroke-linejoin="round"/>
+            <line x1="8" y1="34" x2="36" y2="34" stroke="#E65100" stroke-width="2" stroke-linecap="round"/>
+            <line x1="22" y1="12" x2="22" y2="9" stroke="#E65100" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div class="prize-name">Аяны багц</div>
+        <span class="prize-qty">1ш</span>
+        <span class="hint-badge">дэлгэрэнгүй ▾</span>
+        <div class="prize-tooltip">
+          <h5>Аяллын багц дотроо:</h5>
+          <ul>
+            <li><span class="ti">⛺</span> 4–5 хүний давхар дээвэртэй майхан /260×260×150см/</li>
+            <li><span class="ti">🪑</span> Төмөр ширээ, сандлын ком</li>
+            <li><span class="ti">🛌</span> 2 хүний мишок</li>
+            <li><span class="ti">🍽️</span> Аяга тавагны ком /4 хүн/</li>
+            <li><span class="ti">🏕️</span> Чийгний дэвсгэр /2×2м/</li>
+            <li><span class="ti">🔥</span> Шорлог шарагч</li>
+            <li><span class="ti">🎒</span> Аяны том цүнх /150л/</li>
+            <li><span class="ti">🌿</span> Дүүжин ор</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Chair/table set -->
+      <div class="prize-card">
+        <div class="prize-svg-icon">
+          <svg width="44" height="44" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect width="44" height="44" rx="12" fill="#E8F5E9"/>
+            <!-- Table top -->
+            <rect x="10" y="18" width="24" height="4" rx="2" fill="#2E7D32" opacity=".8"/>
+            <!-- Table legs -->
+            <line x1="14" y1="22" x2="12" y2="34" stroke="#2E7D32" stroke-width="2" stroke-linecap="round"/>
+            <line x1="30" y1="22" x2="32" y2="34" stroke="#2E7D32" stroke-width="2" stroke-linecap="round"/>
+            <!-- Chair seat -->
+            <rect x="26" y="26" width="10" height="3" rx="1.5" fill="#388E3C" opacity=".7"/>
+            <!-- Chair back -->
+            <line x1="34" y1="22" x2="34" y2="29" stroke="#388E3C" stroke-width="2" stroke-linecap="round"/>
+            <!-- Chair leg -->
+            <line x1="27" y1="29" x2="27" y2="35" stroke="#388E3C" stroke-width="1.5" stroke-linecap="round"/>
+            <line x1="35" y1="29" x2="35" y2="35" stroke="#388E3C" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div class="prize-name">Аяны ширээ сандал, аяга тавагны ком</div>
+        <span class="prize-qty">1ш</span>
+      </div>
+
+      <!-- Loan close -->
+      <div class="prize-card">
+        <div class="prize-svg-icon">
+          <svg width="44" height="44" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect width="44" height="44" rx="12" fill="#E3F2FD"/>
+            <!-- Shield -->
+            <path d="M22 10L12 14v8c0 5.5 4.3 10.7 10 12 5.7-1.3 10-6.5 10-12v-8L22 10Z" fill="#1565C0" opacity=".15" stroke="#1565C0" stroke-width="1.5"/>
+            <!-- Checkmark -->
+            <path d="M16 22l4 4 8-8" stroke="#1565C0" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div class="prize-name">Зээл хаах эрх</div>
+        <span class="prize-qty">10ш</span>
+      </div>
+
+      <!-- Loan limit increase -->
+      <div class="prize-card">
+        <div class="prize-svg-icon">
+          <svg width="44" height="44" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect width="44" height="44" rx="12" fill="#EDE7F6"/>
+            <!-- Credit card -->
+            <rect x="9" y="15" width="26" height="17" rx="3" fill="#5E35B1" opacity=".15" stroke="#5E35B1" stroke-width="1.5"/>
+            <rect x="9" y="19" width="26" height="4" fill="#5E35B1" opacity=".25"/>
+            <!-- Plus arrow up -->
+            <path d="M28 28v-5M28 23l-2 2M28 23l2 2" stroke="#5E35B1" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div class="prize-name">Зээлийн эрх нэмэх</div>
+        <span class="prize-qty">10ш</span>
+      </div>
+
+      <!-- WOOW shopping -->
+      <div class="prize-card">
+        <div class="prize-svg-icon">
+          <img src="woow.png" alt="WOOW" style="width:44px;height:44px;object-fit:contain;border-radius:12px;" />
+        </div>
+        <div class="prize-name">50,000₮ WOOW худалдан авалтын эрх</div>
+        <span class="prize-qty">10ш</span>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Info cards -->
+  <section class="info-section" id="faq">
+    <div class="info-grid">
+
+      <a class="info-card" href="#">
+        <div class="info-icon-wrap">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round">
+            <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+            <path d="M2 17l10 5 10-5"/>
+            <path d="M2 12l10 5 10-5"/>
+          </svg>
+        </div>
+        <div class="info-body">
+          <h4>Хэрхэн оролцох вэ?</h4>
+          <p>Аянд хамрагдах сарын үйлдлээ хийж, сугалааны эрхээ авна.</p>
+        </div>
+        <svg class="info-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+      </a>
+
+      <a class="info-card" href="#">
+        <div class="info-icon-wrap">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+            <polyline points="14,2 14,8 20,8"/>
+            <line x1="16" y1="13" x2="8" y2="13"/>
+            <line x1="16" y1="17" x2="8" y2="17"/>
+            <polyline points="10,9 9,9 8,9"/>
+          </svg>
+        </div>
+        <div class="info-body">
+          <h4>Нөхцөл</h4>
+          <p>Аяны нөхцөл, хугацаа, шагналын мэдээлэл.</p>
+        </div>
+        <svg class="info-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+      </a>
+
+      <div class="info-card" style="cursor:default; flex-direction:column; align-items:flex-start; gap:12px;">
+        <div style="display:flex; align-items:center; gap:12px;">
+          <div class="info-icon-wrap">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round">
+              <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.38 2 2 0 0 1 3.59 1.17h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.9a16 16 0 0 0 5.55 5.55l.91-.91a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7a2 2 0 0 1 1.72 2.03z"/>
+            </svg>
+          </div>
+          <div class="info-body">
+            <h4>Холбоо барих</h4>
+            <p>Асуулт байвал бидэнтэй холбогдооорой.</p>
+          </div>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:8px; width:100%; padding-left:4px;">
+          <a href="tel:77767776" style="display:flex; align-items:center; gap:8px; text-decoration:none; color:#1a3bbf; font-size:14px; font-weight:700;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1a3bbf" stroke-width="2" stroke-linecap="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.38 2 2 0 0 1 3.59 1.17h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.9a16 16 0 0 0 5.55 5.55l.91-.91a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7a2 2 0 0 1 1.72 2.03z"/></svg>
+            7776 7776
+          </a>
+          <a href="https://m.me/TpayMNG" target="_blank" style="display:flex; align-items:center; gap:8px; text-decoration:none; color:#0084ff; font-size:14px; font-weight:700;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="#0084ff" xmlns="http://www.w3.org/2000/svg"><path d="M12 2C6.477 2 2 6.145 2 11.259c0 2.943 1.458 5.565 3.742 7.28V22l3.406-1.87c.91.252 1.875.388 2.852.388 5.523 0 10-4.145 10-9.259C22 6.145 17.523 2 12 2Zm1.07 12.47-2.549-2.716-4.974 2.716 5.472-5.81 2.614 2.715 4.908-2.715-5.471 5.81Z"/></svg>
+            m.me/TpayMNG
+          </a>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+</div><!-- /content -->
+
+<footer>
+  Аян 2026.06.20-ны өдрөөс эхлэн 2026.08.21-ний өдрийг дуустал үргэлжилнэ. · © 2026 <a href="https://tpay.mn" style="color:inherit;">TPay</a>
+</footer>
+
+<script>
+  // Mobile tooltip toggle
+  const campingCard = document.getElementById('campingCard');
+  campingCard.addEventListener('click', e => {
+    if (window.matchMedia('(hover: none)').matches) {
+      campingCard.classList.toggle('active');
+      e.stopPropagation();
+    }
+  });
+  document.addEventListener('click', () => campingCard.classList.remove('active'));
+
+  // Smooth scroll for nav links
+  document.querySelectorAll('a[href^="#"]').forEach(a => {
+    a.addEventListener('click', e => {
+      const id = a.getAttribute('href').slice(1);
+      const el = document.getElementById(id);
+      if (el) { e.preventDefault(); el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+    });
+  });
+
+  // ── Raffle data ──
+  let raffleData = {"85403886": 1, "95039791": 1, "90112704": 1, "89890733": 1, "99464190": 1, "91189111": 1, "85357132": 1, "99736657": 1, "94345070": 1, "96808210": 1, "85857672": 1, "95503290": 1, "94228229": 1, "90374546": 1, "95914606": 1, "86027711": 1, "89281097": 1, "86857005": 1, "86930410": 1, "80848975": 1, "99251930": 1, "88603494": 1, "80832506": 1, "86842820": 1, "99960666": 1, "89961710": 1, "85812496": 1, "90505907": 1, "89845066": 1, "88315437": 1, "96886638": 1, "89585905": 1, "80789978": 1, "97071614": 1, "99636515": 1, "99483116": 1, "94988629": 1, "94183562": 1, "85661523": 1, "88218729": 1, "95959103": 1, "83040666": 1, "85477418": 1, "88363406": 1, "88668614": 1, "85369602": 1, "96033777": 1, "99010458": 1, "88042442": 1, "89990695": 1, "90800518": 1, "96201114": 1, "90901403": 1, "99254176": 1, "99467912": 1, "89555441": 1, "99521246": 1, "86619117": 1, "89828605": 1, "85984046": 1, "95079011": 1, "98003781": 1, "94565770": 1, "90509666": 1, "99740054": 1, "86173346": 1, "85447003": 1, "99705623": 1, "85157546": 1, "86160136": 1, "99507065": 1, "94494591": 1, "99356188": 1, "80816679": 1, "95808939": 1, "88267676": 1, "91444998": 1, "88525241": 1, "80836626": 1, "89699079": 1, "86605585": 1, "96381978": 1, "85247005": 1, "94917277": 1, "91214323": 1, "95577129": 1, "99135766": 1, "99963781": 1, "99375653": 1, "99402035": 1, "89138425": 1, "85622797": 1, "80847392": 1, "90022637": 1, "88303154": 1, "90917728": 1, "89209923": 1, "88872264": 1, "89666476": 1, "80859771": 1, "90208811": 1, "99799911": 1, "89792414": 1, "86241433": 1, "88144510": 1, "80601462": 1, "99415020": 1, "97110977": 1, "88845074": 1, "85544318": 1, "91779299": 1, "95671091": 1, "96612031": 1, "88949870": 1, "86265299": 1, "86569181": 1, "95800822": 1, "91530408": 1, "94906299": 1, "86854128": 1, "80787307": 1, "88058937": 1, "94914696": 1, "85375750": 1, "94505452": 1, "89206200": 1, "86211719": 1, "80964243": 1, "94649363": 1, "94532093": 1, "80701703": 1, "86261998": 1, "85086989": 1, "89148910": 1, "94124404": 1, "96690819": 1, "98173427": 1, "94202969": 1, "95342499": 1};
+
+  function updateStats(data) {
+    const entries = Object.entries(data).filter(([k]) => !k.startsWith('_'));
+    const count   = entries.filter(([,v]) => v > 0).length;
+    const total   = entries.reduce((s,[,v]) => s + (v > 0 ? v : 0), 0);
+    const updated = data._updated || '';
+
+    document.getElementById('statsCount').textContent = count.toLocaleString();
+    document.getElementById('statsTotal').textContent = total.toLocaleString();
+
+    // Format date nicely: 2026-06-22 → 2026.06.22
+    if (updated) {
+      document.getElementById('statsDate').textContent = updated.replace(/-/g, '.');
+    }
+
+    if (count > 0) {
+      document.getElementById('statsBanner').style.display = 'block';
+    }
+  }
+
+  async function loadData() {
+    try {
+      const r = await fetch('data.json?t=' + Date.now());
+      if (!r.ok) throw new Error();
+      const fresh = await r.json();
+      raffleData = fresh;
+    } catch {
+      // keep inline fallback
+    }
+    updateStats(raffleData);
+  }
+  loadData();
+
+  // Digits only
+  const phoneInput = document.getElementById('phoneInput');
+  phoneInput.addEventListener('input', () => {
+    phoneInput.value = phoneInput.value.replace(/\D/g, '').slice(0, 8);
+  });
+  phoneInput.addEventListener('keydown', e => { if (e.key === 'Enter') checkRaffle(); });
+
+  async function checkRaffle() {
+    const phone = phoneInput.value.trim();
+    const resultEl = document.getElementById('result');
+    const btn = document.getElementById('checkBtn');
+
+    if (phone.length !== 8) {
+      resultEl.style.display = 'block';
+      resultEl.innerHTML = `<div class="result-error" style="margin-top:14px;">⚠️ 8 оронтой утасны дугаар оруулна уу.</div>`;
+      return;
+    }
+
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span>Шалгаж байна...';
+    resultEl.style.display = 'none';
+
+    await new Promise(r => setTimeout(r, 650));
+    await loadData();
+
+    btn.disabled = false;
+    btn.innerHTML = 'Шалгах';
+    resultEl.style.display = 'block';
+
+    const entry = raffleData[phone];
+    if (entry !== undefined && entry !== null && entry !== 0 && entry !== '') {
+      const tickets = parseInt(entry) || entry;
+      resultEl.innerHTML = `
+        <div class="result-found" style="margin-top:16px;">
+          <div class="r-icon">🎟️</div>
+          <h3>Баяр хүргэе! Та сугалааны эрхтэй байна!</h3>
+          <div class="ticket-count">${tickets}</div>
+          <div class="ticket-label">сугалааны эрх</div>
+          <div class="phone-disp">Бүртгэлтэй дугаар: <strong>${fmt(phone)}</strong></div>
+        </div>`;
+    } else {
+      resultEl.innerHTML = `
+        <div class="result-not-found" style="margin-top:16px;">
+          <div class="r-icon">😔</div>
+          <h3>Сугалааны эрх олдсонгүй</h3>
+          <p style="font-size:13px;color:#7a4020;margin-bottom:10px;"><strong>${fmt(phone)}</strong> дугаарт одоогоор сугалааны эрх бүртгэгдээгүй байна.</p>
+          <div class="campaign-dates">
+            <div class="date-row"><span>🟢</span><span><strong>06.20–07.05</strong> — шинэ зээл авснаар эрх дагалдана.</span></div>
+            <div class="date-row"><span>🔵</span><span><strong>07.06–07.31</strong> — зээлийн эргэн төлөлт бүрт эрх дагалдана.</span></div>
+            <div class="date-row"><span>🟠</span><span><strong>08.01–08.21</strong> — давтан зээл авснаар эрх дагалдана.</span></div>
+          </div>
+        </div>`;
+    }
+  }
+
+  const fmt = p => p.replace(/(\d{4})(\d{4})/, '$1 $2');
+</script>
+</body>
+</html>

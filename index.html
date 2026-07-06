@@ -37,49 +37,81 @@
       border-bottom: 1px solid #e8eaf0;
       position: sticky; top: 0; z-index: 200;
     }
-    .nav-inner { position: relative; }
     .nav-inner {
-      max-width: 1100px;
-      margin: 0 auto;
-      padding: 0 24px;
-      height: 60px;
-      display: flex;
-      align-items: center;
-      gap: 36px;
+      max-width: 1100px; margin: 0 auto;
+      padding: 0 24px; height: 60px;
+      display: flex; align-items: center; gap: 36px;
+      position: relative;
     }
-    .nav-logo { display: flex; align-items: center; gap: 8px; text-decoration: none; }
+    .nav-logo { display: flex; align-items: center; gap: 8px; text-decoration: none; flex-shrink: 0; }
     .nav-logo img { height: 32px; width: auto; }
     .nav-links {
-      display: flex;
-      gap: 4px;
-      flex: 1;
+      display: flex; gap: 4px; flex: 1;
     }
     .nav-links a {
-      text-decoration: none;
-      font-size: 14px;
-      font-weight: 500;
-      color: var(--muted);
-      padding: 6px 14px;
-      border-radius: 8px;
-      transition: color .15s, background .15s;
-      white-space: nowrap;
+      text-decoration: none; font-size: 14px; font-weight: 500;
+      color: var(--muted); padding: 6px 14px; border-radius: 8px;
+      transition: color .15s, background .15s; white-space: nowrap;
     }
     .nav-links a:hover { color: var(--blue); background: #eef2ff; }
     .nav-links a.active {
-      color: var(--blue);
-      font-weight: 700;
-      border-bottom: 2px solid var(--blue);
-      border-radius: 0;
+      color: var(--blue); font-weight: 700;
+      border-bottom: 2px solid var(--blue); border-radius: 0;
     }
     .nav-url {
-      font-size: 13px;
-      color: var(--muted);
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      margin-left: auto;
+      font-size: 13px; color: var(--muted);
+      display: flex; align-items: center; gap: 6px; margin-left: auto;
     }
     .nav-url svg { flex-shrink: 0; }
+
+    /* ── HAMBURGER — base: hidden, shown via media query below ── */
+    .nav-burger {
+      display: none;                   /* ← overridden in @media below */
+      flex-direction: column; justify-content: center; align-items: center;
+      gap: 5px; padding: 8px; margin-left: auto;
+      background: none; border: none; cursor: pointer;
+      border-radius: 8px; transition: background .15s; flex-shrink: 0;
+    }
+    .nav-burger:hover { background: #f0f2f8; }
+    .nav-burger span {
+      display: block; width: 22px; height: 2.5px;
+      background: var(--text); border-radius: 2px; transition: all .25s;
+    }
+    .nav-burger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+    .nav-burger.open span:nth-child(2) { opacity: 0; transform: scaleX(0); }
+    .nav-burger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+    /* Dropdown panel */
+    .nav-dropdown {
+      display: none;
+      position: fixed; top: 60px; left: 0; right: 0;
+      background: #fff; border-bottom: 2px solid #e8eaf0;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.13);
+      padding: 10px 16px 18px; z-index: 199;
+      flex-direction: column; gap: 2px;
+      animation: ddFade .16s ease;
+    }
+    .nav-dropdown.open { display: flex; }
+    @keyframes ddFade {
+      from { opacity: 0; transform: translateY(-6px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .nav-dropdown a {
+      text-decoration: none; font-size: 15px; font-weight: 500;
+      color: var(--text); padding: 13px 14px; border-radius: 10px;
+      transition: background .15s; white-space: nowrap;
+    }
+    .nav-dropdown a:hover  { background: #f4f6ff; color: var(--blue); }
+    .nav-dropdown a.active { background: #eef2ff; color: var(--blue); font-weight: 700; }
+    .nav-dropdown a.draw-link { color: #2ec65a; font-weight: 700; }
+
+    /* ── RESPONSIVE — nav collapses at 1024px (covers all phones + tablets) */
+    @media (max-width: 1024px) {
+      .nav-links  { display: none; }
+      .nav-url    { display: none; }
+      .nav-burger { display: flex; }   /* ← this now works: base none < media flex */
+      .nav-inner  { gap: 0; }
+    }
 
     /* ══════════════════════════════
        HERO BANNER
@@ -585,13 +617,6 @@
     @media (max-width: 900px) {
       .prizes-strip { grid-template-columns: repeat(3, 1fr); }
     }
-    /* Nav collapses to hamburger on anything smaller than real desktop */
-    @media (max-width: 960px) {
-      .nav-links  { display: none; }
-      .nav-url    { display: none; }
-      .nav-burger { display: flex; }
-      .nav-inner  { gap: 0; }
-    }
     /* Content layout collapses on narrow phones */
     @media (max-width: 700px) {
       .campaigns { grid-template-columns: 1fr; margin-top: -16px; }
@@ -602,48 +627,6 @@
       .info-grid   { grid-template-columns: 1fr; }
       .prizes-strip { grid-template-columns: repeat(2, 1fr); }
     }
-
-    /* ── HAMBURGER MENU ──────────────────── */
-    .nav-burger {
-      display: none;
-      flex-direction: column; justify-content: center;
-      gap: 5px; background: none; border: none;
-      cursor: pointer; padding: 8px; margin-left: auto;
-      border-radius: 8px; transition: background .15s;
-    }
-    .nav-burger:hover { background: #f0f2f8; }
-    .nav-burger span {
-      display: block; width: 22px; height: 2px;
-      background: var(--text); border-radius: 2px;
-      transition: all .25s;
-    }
-    /* X animation when open */
-    .nav-burger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
-    .nav-burger.open span:nth-child(2) { opacity: 0; }
-    .nav-burger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
-
-    /* Mobile dropdown — anchors to sticky nav */
-    .nav-links.mobile-open {
-      display: flex !important;
-      flex-direction: column;
-      position: fixed; top: 60px; left: 0; right: 0;
-      background: #fff;
-      border-bottom: 1px solid #e8eaf0;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.12);
-      padding: 8px 16px 16px;
-      z-index: 199;
-      animation: dropDown .18s ease;
-    }
-    @keyframes dropDown {
-      from { opacity: 0; transform: translateY(-8px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-    .nav-links.mobile-open a {
-      padding: 12px 14px; font-size: 15px;
-      border-radius: 10px; border-bottom: none !important;
-    }
-    .nav-links.mobile-open a.active { background: #eef2ff; }
-    .nav-links.mobile-open a:hover  { background: #f4f6ff; }
   </style>
 </head>
 <body>
@@ -658,7 +641,8 @@
         TPay
       </span>
     </a>
-    <div class="nav-links" id="navLinks">
+    <!-- Desktop links -->
+    <div class="nav-links">
       <a href="#">Нүүр</a>
       <a href="#campaigns" class="active">Аян</a>
       <a href="#lookup">Сугалааны эрх шалгах</a>
@@ -669,27 +653,31 @@
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
       loyalty.tpay.mn
     </div>
-    <button class="nav-burger" id="navBurger" onclick="toggleNav()" aria-label="Цэс нээх">
+    <!-- Hamburger button (mobile only) -->
+    <button class="nav-burger" id="navBurger" onclick="toggleNav()" aria-label="Цэс">
       <span></span><span></span><span></span>
     </button>
+  </div>
+  <!-- Mobile dropdown (separate from desktop links) -->
+  <div class="nav-dropdown" id="navDropdown">
+    <a href="#" onclick="closeNav()">Нүүр</a>
+    <a href="#campaigns" class="active" onclick="closeNav()">Аян</a>
+    <a href="#lookup" onclick="closeNav()">Сугалааны эрх шалгах</a>
+    <a href="#faq" onclick="closeNav()">Түгээмэл асуулт</a>
+    <a href="draw.html" class="draw-link">🎰 Тохирол</a>
   </div>
 </nav>
 <script>
 function toggleNav() {
-  const links  = document.getElementById('navLinks');
-  const burger = document.getElementById('navBurger');
-  const isOpen = links.classList.toggle('mobile-open');
-  burger.classList.toggle('open', isOpen);
+  var dd = document.getElementById('navDropdown');
+  var btn = document.getElementById('navBurger');
+  var isOpen = dd.classList.toggle('open');
+  btn.classList.toggle('open', isOpen);
 }
-// Close menu when any nav link is clicked
-document.addEventListener('DOMContentLoaded', function() {
-  document.querySelectorAll('#navLinks a').forEach(function(a) {
-    a.addEventListener('click', function() {
-      document.getElementById('navLinks').classList.remove('mobile-open');
-      document.getElementById('navBurger').classList.remove('open');
-    });
-  });
-});
+function closeNav() {
+  document.getElementById('navDropdown').classList.remove('open');
+  document.getElementById('navBurger').classList.remove('open');
+}
 </script>
 
 <!-- ── HERO BANNER ── -->

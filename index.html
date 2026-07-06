@@ -37,6 +37,7 @@
       border-bottom: 1px solid #e8eaf0;
       position: sticky; top: 0; z-index: 200;
     }
+    .nav-inner { position: relative; }
     .nav-inner {
       max-width: 1100px;
       margin: 0 auto;
@@ -177,15 +178,20 @@
     .c-status {
       display: inline-flex; align-items: center; gap: 5px;
       font-size: 11px; font-weight: 700;
-      background: rgba(0,0,0,0.2);
+      background: rgba(255,255,255,0.92);
       border-radius: 50px; padding: 3px 10px;
-      color: #fff; width: fit-content;
+      width: fit-content;
     }
+    .c-card.green  .c-status { color: #0d8c12; }
+    .c-card.blue   .c-status { color: #0932cc; }
+    .c-card.orange .c-status { color: #c02800; }
     .c-status-dot {
       width: 6px; height: 6px; border-radius: 50%;
-      background: #fde047; flex-shrink: 0;
-      animation: blink 1.4s ease-in-out infinite;
+      flex-shrink: 0; animation: blink 1.4s ease-in-out infinite;
     }
+    .c-card.green  .c-status-dot { background: #17b81a; }
+    .c-card.blue   .c-status-dot { background: #1847f0; }
+    .c-card.orange .c-status-dot { background: #f5832e; }
     @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.2} }
 
     /* white body */
@@ -588,7 +594,51 @@
       .info-grid   { grid-template-columns: 1fr; }
       .prizes-strip { grid-template-columns: repeat(2, 1fr); }
       .nav-links   { display: none; }
+      .nav-url     { display: none; }
+      .nav-burger  { display: flex; }
     }
+
+    /* ── HAMBURGER MENU ──────────────────── */
+    .nav-burger {
+      display: none;
+      flex-direction: column; justify-content: center;
+      gap: 5px; background: none; border: none;
+      cursor: pointer; padding: 8px; margin-left: auto;
+      border-radius: 8px; transition: background .15s;
+    }
+    .nav-burger:hover { background: #f0f2f8; }
+    .nav-burger span {
+      display: block; width: 22px; height: 2px;
+      background: var(--text); border-radius: 2px;
+      transition: all .25s;
+    }
+    /* X animation when open */
+    .nav-burger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+    .nav-burger.open span:nth-child(2) { opacity: 0; }
+    .nav-burger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+    /* Mobile dropdown */
+    .nav-links.mobile-open {
+      display: flex !important;
+      flex-direction: column;
+      position: absolute; top: 60px; left: 0; right: 0;
+      background: #fff;
+      border-bottom: 1px solid #e8eaf0;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.10);
+      padding: 8px 12px 14px;
+      z-index: 199;
+      animation: dropDown .18s ease;
+    }
+    @keyframes dropDown {
+      from { opacity: 0; transform: translateY(-8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .nav-links.mobile-open a {
+      padding: 12px 14px; font-size: 15px;
+      border-radius: 10px; border-bottom: none !important;
+    }
+    .nav-links.mobile-open a.active { background: #eef2ff; }
+    .nav-links.mobile-open a:hover  { background: #f4f6ff; }
   </style>
 </head>
 <body>
@@ -603,7 +653,7 @@
         TPay
       </span>
     </a>
-    <div class="nav-links">
+    <div class="nav-links" id="navLinks">
       <a href="#">Нүүр</a>
       <a href="#campaigns" class="active">Аян</a>
       <a href="#lookup">Сугалааны эрх шалгах</a>
@@ -614,8 +664,28 @@
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
       loyalty.tpay.mn
     </div>
+    <button class="nav-burger" id="navBurger" onclick="toggleNav()" aria-label="Цэс нээх">
+      <span></span><span></span><span></span>
+    </button>
   </div>
 </nav>
+<script>
+function toggleNav() {
+  const links  = document.getElementById('navLinks');
+  const burger = document.getElementById('navBurger');
+  const isOpen = links.classList.toggle('mobile-open');
+  burger.classList.toggle('open', isOpen);
+}
+// Close menu when any nav link is clicked
+document.addEventListener('DOMContentLoaded', function() {
+  document.querySelectorAll('#navLinks a').forEach(function(a) {
+    a.addEventListener('click', function() {
+      document.getElementById('navLinks').classList.remove('mobile-open');
+      document.getElementById('navBurger').classList.remove('open');
+    });
+  });
+});
+</script>
 
 <!-- ── HERO BANNER ── -->
 <section class="hero">

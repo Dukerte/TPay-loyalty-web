@@ -1038,12 +1038,12 @@ function startDraw() {
     setDrum(randomMasked());
     elapsed += delay;
     if (elapsed < total) setTimeout(tick, delay);
-    else finalize(chosen, idx);
+    else finalize(chosen, idx, nonce);
   }
   tick();
 }
 
-function finalize(entry, idx) {
+function finalize(entry, idx, nonce) {
   remaining.splice(idx, 1);
   const masked  = maskPhone(entry.phone);
   const initial = nameInitial(entry);

@@ -390,7 +390,7 @@
     .dc-card.blue   .dc-head { background: linear-gradient(135deg, #1847f0, #0932cc); }
     .dc-card.orange .dc-head { background: linear-gradient(145deg, #ee3520, #f5920e); }
 
-    .dc-title { font-size: 15px; font-weight: 900; color: #fff; }
+    .dc-title { font-size: 17px; font-weight: 900; color: #fff; }
     .dc-status {
       display: inline-flex; align-items: center; gap: 5px;
       font-size: 10px; font-weight: 700;
@@ -427,11 +427,11 @@
     .dc-card.orange .dc-action-icon { background: #ee3520; }
 
     .dc-action-text { display: flex; flex-direction: column; gap: 1px; }
-    .dc-action-title { font-size: 11px; font-weight: 800; }
+    .dc-action-title { font-size: 13px; font-weight: 800; }
     .dc-card.green  .dc-action-title { color: #0a7a10; }
     .dc-card.blue   .dc-action-title { color: #0a2fd4; }
     .dc-card.orange .dc-action-title { color: #c02800; }
-    .dc-action-sub { font-size: 10px; color: #6b7280; line-height: 1.3; }
+    .dc-action-sub { font-size: 11.5px; color: #6b7280; line-height: 1.3; }
 
     .dc-date {
       display: flex; align-items: center; justify-content: center; gap: 5px;
@@ -777,6 +777,75 @@
 </div>
 
 <script>
+// ── AUDIO ENGINE ────────────────────────────────────────
+let _ac = null;
+function ac() {
+  if (!_ac) _ac = new (window.AudioContext || window.webkitAudioContext)();
+  if (_ac.state === 'suspended') _ac.resume();
+  return _ac;
+}
+
+// Tick sound — pitch rises as drum slows (progress 0→1)
+function playTick(progress) {
+  try {
+    const ctx = ac();
+    const pitch = 300 + progress * 900;          // 300 Hz → 1200 Hz
+    const len   = Math.floor(ctx.sampleRate * 0.04);
+    const buf   = ctx.createBuffer(1, len, ctx.sampleRate);
+    const d     = buf.getChannelData(0);
+    for (let i = 0; i < len; i++)
+      d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 2);
+
+    const src = ctx.createBufferSource();
+    src.buffer = buf;
+    const f = ctx.createBiquadFilter();
+    f.type = 'bandpass'; f.frequency.value = pitch; f.Q.value = 3;
+    const g = ctx.createGain(); g.gain.value = 0.55;
+    src.connect(f); f.connect(g); g.connect(ctx.destination);
+    src.start();
+  } catch(e) {}
+}
+
+// Triumphant win fanfare
+function playWinFanfare() {
+  try {
+    const ctx = ac();
+    // Ascending arpeggio: C–E–G–C–E (builds up)
+    [523, 659, 784, 1047, 1319].forEach((hz, i) => {
+      const osc = ctx.createOscillator();
+      const g   = ctx.createGain();
+      osc.connect(g); g.connect(ctx.destination);
+      osc.type = 'sine'; osc.frequency.value = hz;
+      const t = ctx.currentTime + i * 0.11;
+      g.gain.setValueAtTime(0.32, t);
+      g.gain.exponentialRampToValueAtTime(0.001, t + 0.55);
+      osc.start(t); osc.stop(t + 0.55);
+    });
+    // Big chord hit
+    [523, 659, 784, 1047].forEach(hz => {
+      const osc = ctx.createOscillator();
+      const g   = ctx.createGain();
+      osc.connect(g); g.connect(ctx.destination);
+      osc.type = 'sine'; osc.frequency.value = hz;
+      const t = ctx.currentTime + 0.67;
+      g.gain.setValueAtTime(0.25, t);
+      g.gain.exponentialRampToValueAtTime(0.001, t + 2.0);
+      osc.start(t); osc.stop(t + 2.0);
+    });
+    // Sparkle shimmer on top
+    [2093, 2637, 3136].forEach((hz, i) => {
+      const osc = ctx.createOscillator();
+      const g   = ctx.createGain();
+      osc.connect(g); g.connect(ctx.destination);
+      osc.type = 'sine'; osc.frequency.value = hz;
+      const t = ctx.currentTime + 0.67 + i * 0.06;
+      g.gain.setValueAtTime(0.1, t);
+      g.gain.exponentialRampToValueAtTime(0.001, t + 0.3);
+      osc.start(t); osc.stop(t + 0.3);
+    });
+  } catch(e) {}
+}
+
 // ── CRYPTO RANDOM ────────────────────────────────────────
 function secureRandInt(max) {
   // Uses Web Crypto API — cryptographically secure
@@ -1036,6 +1105,7 @@ function startDraw() {
     const pct   = elapsed / total;
     const delay = pct < 0.65 ? 55 : 55 + 170 * ((pct - 0.65) / 0.35);
     setDrum(randomMasked());
+    playTick(pct);
     elapsed += delay;
     if (elapsed < total) setTimeout(tick, delay);
     else finalize(chosen, idx, nonce);
@@ -1058,6 +1128,7 @@ function finalize(entry, idx, nonce) {
   setTimeout(() => {
     showOverlay(masked, initial, entry.kiosk, entry.date, prize.label);
     launchConfetti();
+    playWinFanfare();
     addLog(masked, initial, entry.kiosk, entry.date, prize.label, winners.length + 1, nonce);
     winners.push({ ...entry, prize: prize.label, nonce });
     saveState();

@@ -1,0 +1,1175 @@
+<!DOCTYPE html>
+<html lang="mn">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TPay – Сугалааны Тохирол</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --blue-dark: #0a1f6e;
+      --blue:      #1a3bbf;
+      --green:     #2ec65a;
+      --orange:    #f5832e;
+      --yellow:    #f5c400;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(160deg, #05103a 0%, #0a1f6e 50%, #0d2d8a 100%);
+      min-height: 100vh;
+      color: #fff;
+      overflow-x: hidden;
+    }
+
+    /* ── NAV ───────────────────────────────── */
+    nav {
+      background: rgba(255,255,255,0.06);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+    .nav-inner {
+      max-width: 1100px; margin: 0 auto;
+      padding: 0 24px; height: 60px;
+      display: flex; align-items: center; gap: 14px;
+    }
+    .nav-logo { display:flex; align-items:center; gap:10px; text-decoration:none; }
+    .nav-logo img { height: 28px; }
+    .nav-logo span { font-size:15px; font-weight:700; color:#fff; }
+    .live-tag {
+      display: flex; align-items: center; gap: 6px;
+      background: rgba(239,68,68,0.18);
+      border: 1px solid rgba(239,68,68,0.4);
+      border-radius: 50px; padding: 4px 12px;
+      font-size: 12px; font-weight: 700; color: #fca5a5;
+    }
+    .live-dot {
+      width: 7px; height: 7px; border-radius: 50%;
+      background: #ef4444;
+      animation: pulse 1.4s ease-in-out infinite;
+    }
+    @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(1.4)} }
+    .nav-back {
+      margin-left:auto; font-size:13px; font-weight:600;
+      color:rgba(255,255,255,0.6); text-decoration:none;
+      padding:6px 14px; border-radius:8px;
+      border:1px solid rgba(255,255,255,0.18);
+      transition: all .2s;
+    }
+    .nav-back:hover { background:rgba(255,255,255,0.1); color:#fff; }
+
+    /* ── HERO BANNER ───────────────────────── */
+    .hero-banner {
+      background:
+        url('robot-bg.png') center center / cover no-repeat,
+        linear-gradient(135deg, #0a2080, #1848cc);
+      min-height: 220px;
+      display: flex; align-items: center; justify-content: center;
+      position: relative; overflow: hidden;
+    }
+    .hero-banner::after { display: none; }
+    .hero-content {
+      position:relative; z-index:2;
+      display:flex; flex-direction:column; align-items:center;
+      padding: 28px 24px;
+      gap: 4px;
+    }
+    .hero-title-img {
+      width: min(420px, 88vw);
+      filter: drop-shadow(0 4px 24px rgba(0,0,0,0.45));
+    }
+    .hero-sub-img {
+      width: min(220px, 55vw);
+      filter: drop-shadow(0 2px 10px rgba(0,0,0,0.35));
+      margin-top: -8px;
+    }
+
+    /* ── MAIN LAYOUT ───────────────────────── */
+    .page {
+      max-width: 760px; margin: 0 auto;
+      padding: 28px 20px 60px;
+      display: flex; flex-direction: column; align-items: center; gap: 24px;
+    }
+
+    .badge-row {
+      display: flex; align-items: center; gap: 10px; flex-wrap: wrap; justify-content: center;
+    }
+    .badge-row span {
+      background: rgba(46,198,90,0.12);
+      border: 1px solid rgba(46,198,90,0.3);
+      border-radius: 50px; padding: 5px 20px;
+      font-size: 13px; font-weight: 700; color: #7bffb0;
+    }
+
+    /* ── PRIZE CARDS ───────────────────────── */
+    .prize-grid {
+      width: 100%;
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 10px;
+    }
+    .prize-card {
+      background: rgba(255,255,255,0.07);
+      border: 2px solid rgba(255,255,255,0.1);
+      border-radius: 14px; padding: 14px 10px 12px;
+      cursor: pointer; transition: all .2s;
+      text-align: center;
+      position: relative;
+    }
+    .prize-card:hover { background: rgba(255,255,255,0.13); transform: translateY(-2px); }
+    .prize-card.selected {
+      border-color: var(--yellow);
+      background: rgba(245,196,0,0.1);
+      box-shadow: 0 0 0 1px var(--yellow), 0 4px 20px rgba(245,196,0,0.2);
+    }
+    .prize-card.depleted {
+      opacity: 0.35; pointer-events: none;
+    }
+    .prize-card .p-icon { font-size: 24px; margin-bottom: 6px; line-height: 1; }
+    .prize-card .p-icon img { width: 32px; height: 32px; object-fit: contain; }
+    .prize-card .p-name {
+      font-size: 11px; font-weight: 700; color: rgba(255,255,255,0.85);
+      line-height: 1.3; margin-bottom: 8px;
+    }
+    .prize-card .p-count {
+      display: inline-flex; align-items: center; justify-content: center;
+      background: rgba(255,255,255,0.1);
+      border-radius: 50px; padding: 2px 10px;
+      font-size: 12px; font-weight: 800; color: var(--yellow);
+      min-width: 36px;
+    }
+    .prize-card.selected .p-count {
+      background: var(--yellow); color: #000;
+    }
+    .prize-card .p-remaining {
+      position: absolute; top: 8px; right: 8px;
+      font-size: 10px; font-weight: 700;
+      color: rgba(255,255,255,0.4);
+    }
+    @media (max-width: 600px) {
+      .prize-grid { grid-template-columns: repeat(3, 1fr); }
+    }
+
+    /* ── MACHINE ───────────────────────────── */
+    .machine {
+      width: 100%;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 24px; padding: 28px 24px 24px;
+      backdrop-filter: blur(20px);
+      box-shadow: 0 20px 70px rgba(0,0,0,0.4);
+      display: flex; flex-direction: column; align-items: center; gap: 20px;
+    }
+
+    .drum-wrap {
+      width: 100%; height: 108px;
+      background: rgba(0,0,0,0.35);
+      border-radius: 16px; border: 1.5px solid rgba(255,255,255,0.08);
+      overflow: hidden; position: relative;
+    }
+    .drum-wrap::before, .drum-wrap::after {
+      content:''; position:absolute; left:0; right:0; height:30px; z-index:2; pointer-events:none;
+    }
+    .drum-wrap::before { top:0;    background:linear-gradient(to bottom, rgba(5,12,42,0.9), transparent); }
+    .drum-wrap::after  { bottom:0; background:linear-gradient(to top,   rgba(5,12,42,0.9), transparent); }
+    .drum-center {
+      position:absolute; top:50%; left:4%; right:4%;
+      transform:translateY(-50%); height:54px;
+      border-top:1.5px solid rgba(255,255,255,0.15);
+      border-bottom:1.5px solid rgba(255,255,255,0.15);
+      border-radius:4px; background:rgba(255,255,255,0.025);
+      z-index:1; pointer-events:none;
+    }
+    .drum { display:flex; flex-direction:column; align-items:center; }
+    .drum-item {
+      height:54px; width:100%;
+      display:flex; align-items:center; justify-content:center;
+      font-size:26px; font-weight:900; letter-spacing:8px;
+      color:rgba(255,255,255,0.22); flex-shrink:0; user-select:none;
+    }
+    .drum-item.active { color:#fff; font-size:30px; letter-spacing:10px; }
+
+    .draw-btn {
+      width:100%; height:58px; border:none; border-radius:14px;
+      font-size:17px; font-weight:800; cursor:pointer;
+      background:linear-gradient(135deg, #2ec65a, #1aaa44);
+      color:#fff; font-family:'Inter',sans-serif;
+      box-shadow: 0 6px 28px rgba(46,198,90,0.4);
+      transition: transform .15s, box-shadow .15s;
+      display:flex; align-items:center; justify-content:center; gap:10px;
+    }
+    .draw-btn:hover:not(:disabled) { transform:translateY(-2px); box-shadow:0 10px 36px rgba(46,198,90,0.5); }
+    .draw-btn:disabled { opacity:.4; cursor:not-allowed; transform:none !important; }
+    .draw-btn.spinning {
+      background:linear-gradient(135deg, #1a3bbf, #2555f0);
+      box-shadow:0 6px 28px rgba(37,85,240,0.4);
+    }
+
+    /* ── TRUST STRIP ──────────────────────── */
+    .trust-strip {
+      width: 100%;
+      background: rgba(0,0,0,0.25);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 18px;
+      padding: 14px 16px;
+      display: flex; flex-wrap: wrap; gap: 8px; justify-content: center;
+    }
+    .trust-badge {
+      display: flex; align-items: center; gap: 7px;
+      border-radius: 50px; padding: 7px 14px;
+      font-size: 11.5px; font-weight: 700;
+    }
+    .trust-badge svg { flex-shrink: 0; }
+    /* green badges */
+    .trust-badge {
+      background: rgba(46,198,90,0.12);
+      border: 1px solid rgba(46,198,90,0.25);
+      color: #a7f3c0;
+    }
+    .trust-badge .trust-highlight { color: #4ade80; }
+    /* aws badge */
+    .trust-badge.aws {
+      background: rgba(245,166,35,0.12);
+      border: 1px solid rgba(245,166,35,0.25);
+      color: #fcd48a;
+    }
+    .trust-badge.aws .trust-highlight { color: #fbbf24; }
+    /* pool badge */
+    .trust-badge.pool {
+      background: rgba(99,149,255,0.12);
+      border: 1px solid rgba(99,149,255,0.25);
+      color: #bfcfff;
+    }
+    .trust-badge.pool .trust-highlight { color: #93c5fd; }
+
+    /* draw nonce in log row */
+    .log-nonce {
+      font-size: 9.5px; color: rgba(255,255,255,0.2);
+      margin-top: 3px; font-family: monospace; letter-spacing: 0.5px;
+    }
+
+    /* ── LOG ───────────────────────────────── */
+    .log-section { width:100%; }
+    .log-hdr {
+      display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;
+    }
+    .log-hdr h3 { font-size:15px; font-weight:700; }
+    .clear-btn {
+      font-size:12px; font-weight:600; color:rgba(255,255,255,0.4);
+      background:none; border:1px solid rgba(255,255,255,0.15);
+      border-radius:6px; padding:4px 10px; cursor:pointer; transition:all .15s;
+    }
+    .clear-btn:hover { color:var(--orange); border-color:var(--orange); }
+
+    .log-list {
+      display:flex; flex-direction:column; gap:8px;
+      max-height:380px; overflow-y:auto;
+    }
+    .log-list::-webkit-scrollbar { width:4px; }
+    .log-list::-webkit-scrollbar-thumb { background:rgba(255,255,255,0.18); border-radius:4px; }
+
+    .log-row {
+      display:flex; align-items:center; gap:12px;
+      background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.08);
+      border-radius:12px; padding:12px 16px;
+      animation:slideIn .3s ease;
+    }
+    @keyframes slideIn { from{opacity:0;transform:translateX(-14px)} to{opacity:1;transform:translateX(0)} }
+    .log-rank {
+      width:28px; height:28px; border-radius:50%; flex-shrink:0;
+      display:flex; align-items:center; justify-content:center;
+      font-size:12px; font-weight:800;
+      background:rgba(255,255,255,0.1); color:var(--yellow);
+    }
+    .log-rank.gold   { background:linear-gradient(135deg,#f5c400,#c98a00); color:#fff; }
+    .log-rank.silver { background:linear-gradient(135deg,#9ca3af,#6b7280); color:#fff; }
+    .log-rank.bronze { background:linear-gradient(135deg,#cd7c4a,#8b4513); color:#fff; }
+    .log-info { flex:1; min-width:0; }
+    .log-phone { font-size:16px; font-weight:800; letter-spacing:3px; }
+    .log-name  { font-size:12px; color:rgba(255,255,255,0.45); margin-top:1px; }
+    .log-right { text-align:right; flex-shrink:0; }
+    .log-prize {
+      font-size:11px; font-weight:700; padding:3px 10px; border-radius:50px;
+      background:rgba(46,198,90,0.12); color:#7bffb0;
+      border:1px solid rgba(46,198,90,0.25);
+    }
+    .log-date { font-size:10px; color:rgba(255,255,255,0.3); margin-top:4px; }
+    .empty-state { text-align:center; padding:28px 0; color:rgba(255,255,255,0.28); font-size:13px; }
+
+    /* ── CONGRATS OVERLAY ──────────────────── */
+    #overlay {
+      position:fixed; inset:0; z-index:500;
+      background:rgba(3,8,28,0.9);
+      display:none; align-items:center; justify-content:center;
+      backdrop-filter:blur(8px);
+    }
+    #overlay.show { display:flex; }
+
+    .ov-card {
+      background:linear-gradient(145deg, #0e2570, #1a3bbf);
+      border:1px solid rgba(255,255,255,0.2);
+      border-radius:32px; padding:48px 44px 40px;
+      max-width:480px; width:92%; text-align:center;
+      box-shadow:0 32px 100px rgba(0,0,0,0.7);
+      animation:cardPop .45s cubic-bezier(0.175,0.885,0.32,1.275);
+      position:relative; overflow:hidden;
+    }
+    @keyframes cardPop {
+      from{opacity:0;transform:scale(0.55) translateY(50px)}
+      to{opacity:1;transform:scale(1) translateY(0)}
+    }
+    .ov-card::before {
+      content:'';
+      position:absolute; inset:0;
+      background:radial-gradient(ellipse at 50% -10%, rgba(245,196,0,0.22), transparent 60%);
+      pointer-events:none;
+    }
+
+    .ov-trophy { font-size:60px; line-height:1; margin-bottom:10px; animation:bounce 1s ease infinite; }
+    @keyframes bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
+    .ov-label { font-size:11px; font-weight:800; letter-spacing:3px; color:var(--yellow); margin-bottom:16px; }
+    .ov-phone {
+      font-size:46px; font-weight:900; letter-spacing:10px; color:#fff; line-height:1;
+      text-shadow:0 0 40px rgba(123,255,176,0.5), 0 4px 20px rgba(0,0,0,0.4);
+    }
+    .ov-person {
+      margin-top:10px; font-size:20px; font-weight:700;
+      color:rgba(255,255,255,0.82);
+    }
+    .ov-meta {
+      margin-top:8px; font-size:13px; color:rgba(255,255,255,0.45);
+      display:flex; align-items:center; justify-content:center; gap:16px; flex-wrap:wrap;
+    }
+    .ov-prize-tag {
+      margin-top:22px; display:inline-block;
+      background:rgba(46,198,90,0.15); border:1.5px solid rgba(46,198,90,0.4);
+      border-radius:50px; padding:7px 22px;
+      font-size:14px; font-weight:700; color:#7bffb0;
+    }
+    .ov-close {
+      margin-top:28px; width:100%; height:48px; border:none; border-radius:12px;
+      cursor:pointer; background:rgba(255,255,255,0.1);
+      color:rgba(255,255,255,0.7); font-size:14px; font-weight:700;
+      font-family:'Inter',sans-serif;
+      border:1px solid rgba(255,255,255,0.15); transition:all .2s;
+    }
+    .ov-close:hover { background:rgba(255,255,255,0.18); color:#fff; }
+
+    /* ── CAMPAIGN CARDS ───────────────────── */
+    .draw-campaigns-wrap {
+      background: linear-gradient(160deg, #05103a 0%, #0a1f6e 50%, #0d2d8a 100%);
+      padding: 28px 20px 0;
+    }
+    .draw-campaigns {
+      max-width: 1000px; margin: 0 auto;
+      display: grid; grid-template-columns: repeat(3,1fr);
+      gap: 14px;
+    }
+
+    /* White cards with colored header — matches index.html style */
+    .dc-card {
+      background: #fff;
+      border-radius: 18px;
+      box-shadow: 0 6px 28px rgba(0,0,0,0.18);
+      overflow: hidden;
+      transition: transform .2s, box-shadow .2s;
+      display: flex; flex-direction: column;
+    }
+    .dc-card:hover { transform: translateY(-3px); box-shadow: 0 12px 36px rgba(0,0,0,0.22); }
+
+    .dc-head {
+      padding: 14px 16px 12px;
+      display: flex; flex-direction: row; align-items: center; gap: 10px;
+    }
+    .dc-head-text { display: flex; flex-direction: column; gap: 7px; flex: 1; min-width: 0; }
+    .dc-head-icon { flex-shrink: 0; display: flex; align-items: center; }
+    .dc-head-icon img { width: 28px; height: 28px; object-fit: contain; opacity: 0.55; }
+    .dc-card.green  .dc-head { background: linear-gradient(135deg, #17b81a, #0d9e10); }
+    .dc-card.blue   .dc-head { background: linear-gradient(135deg, #1847f0, #0932cc); }
+    .dc-card.orange .dc-head { background: linear-gradient(145deg, #ee3520, #f5920e); }
+
+    .dc-title { font-size: 15px; font-weight: 900; color: #fff; }
+    .dc-status {
+      display: inline-flex; align-items: center; gap: 5px;
+      font-size: 10px; font-weight: 700;
+      background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 50px; padding: 3px 9px;
+      color: #fff; width: fit-content;
+    }
+    .dc-dot {
+      width: 5px; height: 5px; border-radius: 50%; background: #fde047; flex-shrink: 0;
+      animation: blink 1.4s ease-in-out infinite;
+    }
+
+    .dc-body {
+      padding: 12px 14px 14px;
+      display: flex; flex-direction: column; gap: 10px; flex: 1;
+    }
+    .dc-actions { display: flex; gap: 0; }
+    .dc-action {
+      display: flex; align-items: center; gap: 8px;
+      flex: 1; padding: 9px 10px;
+      border-radius: 10px; border: 1px solid #e8edf8;
+    }
+    .dc-action + .dc-action { margin-left: 6px; }
+    .dc-card.green  .dc-action { background: #f0fff4; border-color: #c6f0cc; }
+    .dc-card.blue   .dc-action { background: #f0f4ff; border-color: #c8d4fc; }
+    .dc-card.orange .dc-action { background: #fff5f0; border-color: #fcd9c6; }
+
+    .dc-action-icon {
+      width: 26px; height: 26px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .dc-card.green  .dc-action-icon { background: #17b81a; }
+    .dc-card.blue   .dc-action-icon { background: #1847f0; }
+    .dc-card.orange .dc-action-icon { background: #ee3520; }
+
+    .dc-action-text { display: flex; flex-direction: column; gap: 1px; }
+    .dc-action-title { font-size: 11px; font-weight: 800; }
+    .dc-card.green  .dc-action-title { color: #0a7a10; }
+    .dc-card.blue   .dc-action-title { color: #0a2fd4; }
+    .dc-card.orange .dc-action-title { color: #c02800; }
+    .dc-action-sub { font-size: 10px; color: #6b7280; line-height: 1.3; }
+
+    .dc-date {
+      display: flex; align-items: center; justify-content: center; gap: 5px;
+      border-radius: 50px; padding: 6px 0;
+      font-size: 12px; font-weight: 800;
+    }
+    .dc-card.green  .dc-date { background: #e8fff0; color: #0a7a10; border: 1.5px solid #c6f0cc; }
+    .dc-card.blue   .dc-date { background: #eef2ff; color: #0a2fd4; border: 1.5px solid #c8d4fc; }
+    .dc-card.orange .dc-date { background: #fff3ee; color: #c02800; border: 1.5px solid #fcd9c6; }
+
+    @media (max-width: 650px) {
+      .draw-campaigns { grid-template-columns: 1fr; }
+      .draw-campaigns-wrap { padding: 20px 16px 0; }
+    }
+
+    /* ── GATE SCREEN ──────────────────────── */
+    #gate {
+      position: fixed; inset: 0; z-index: 800;
+      background: linear-gradient(160deg, #03081c 0%, #071550 50%, #0a1f6e 100%);
+      display: flex; align-items: center; justify-content: center;
+      padding: 24px;
+    }
+    #gate.hidden { display: none; }
+    .gate-card {
+      width: 100%; max-width: 420px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 28px; padding: 40px 36px 36px;
+      backdrop-filter: blur(20px);
+      box-shadow: 0 24px 80px rgba(0,0,0,0.5);
+      display: flex; flex-direction: column; align-items: center; gap: 28px;
+    }
+    .gate-logo { display: flex; align-items: center; gap: 10px; }
+    .gate-logo img { height: 30px; }
+    .gate-logo span { font-size: 16px; font-weight: 800; color: #fff; }
+    .gate-title-img {
+      width: min(300px, 80vw);
+      filter: drop-shadow(0 4px 24px rgba(0,0,0,0.5));
+    }
+    .gate-label {
+      font-size: 12px; font-weight: 700; letter-spacing: 2px;
+      color: rgba(255,255,255,0.35); text-transform: uppercase; text-align: center;
+    }
+    .gate-btns { width: 100%; display: flex; flex-direction: column; gap: 12px; }
+    .gate-btn {
+      width: 100%; height: 54px; border: none; border-radius: 14px;
+      font-size: 15px; font-weight: 800; cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      display: flex; align-items: center; justify-content: center; gap: 10px;
+      transition: transform .15s, box-shadow .15s;
+    }
+    .gate-btn:hover { transform: translateY(-2px); }
+    .gate-btn-admin {
+      background: linear-gradient(135deg, #1847f0, #0932cc);
+      color: #fff; box-shadow: 0 6px 28px rgba(24,71,240,0.45);
+    }
+    .gate-btn-admin:hover { box-shadow: 0 10px 36px rgba(24,71,240,0.55); }
+    .gate-btn-viewer {
+      background: rgba(255,255,255,0.08);
+      color: rgba(255,255,255,0.85);
+      border: 1px solid rgba(255,255,255,0.18) !important;
+    }
+    .gate-btn-viewer:hover { background: rgba(255,255,255,0.14); }
+
+    /* PIN step */
+    #pinStep { width: 100%; display: none; flex-direction: column; gap: 12px; }
+    #pinStep.show { display: flex; }
+    .pin-label {
+      font-size: 12px; font-weight: 700; color: rgba(255,255,255,0.45);
+      letter-spacing: 1px; text-align: center;
+    }
+    .pin-input {
+      width: 100%; height: 50px; border-radius: 12px;
+      background: rgba(255,255,255,0.08); border: 1.5px solid rgba(255,255,255,0.18);
+      color: #fff; font-size: 20px; font-weight: 700; letter-spacing: 6px;
+      text-align: center; outline: none; font-family: 'Inter', sans-serif;
+      transition: border-color .2s;
+    }
+    .pin-input:focus { border-color: rgba(24,71,240,0.7); }
+    .pin-input.error { border-color: #ef4444; animation: shake .3s; }
+    @keyframes shake {
+      0%,100%{transform:translateX(0)} 25%{transform:translateX(-6px)} 75%{transform:translateX(6px)}
+    }
+    .pin-confirm {
+      width: 100%; height: 48px; border: none; border-radius: 12px;
+      background: linear-gradient(135deg, #1847f0, #0932cc);
+      color: #fff; font-size: 14px; font-weight: 800; cursor: pointer;
+      font-family: 'Inter', sans-serif;
+    }
+    .pin-back {
+      background: none; border: none; color: rgba(255,255,255,0.4);
+      font-size: 12px; font-weight: 600; cursor: pointer;
+      font-family: 'Inter', sans-serif; text-align: center;
+    }
+    .pin-back:hover { color: rgba(255,255,255,0.7); }
+
+    /* viewer mode hides admin-only controls */
+    body.viewer .admin-only { display: none !important; }
+    body.viewer .clear-btn  { display: none !important; }
+    .viewer-badge {
+      background: rgba(99,102,241,0.12); border: 1px solid rgba(99,102,241,0.3);
+      border-radius: 50px; padding: 5px 18px;
+      font-size: 12px; font-weight: 700; color: #a5b4fc;
+      display: none;
+    }
+    body.viewer .viewer-badge { display: inline-block; }
+
+    /* ── CONFETTI ──────────────────────────── */
+    #confettiCanvas { position:fixed; inset:0; pointer-events:none; z-index:999; }
+
+    @media (max-width:540px) {
+      .ov-phone { font-size:32px; letter-spacing:6px; }
+      .ov-card { padding:36px 22px 28px; }
+    }
+  </style>
+</head>
+<body>
+<canvas id="confettiCanvas"></canvas>
+
+<!-- ── GATE SCREEN ─────────────────────────────────────── -->
+<div id="gate">
+  <div class="gate-card">
+    <div class="gate-logo">
+      <img src="TPay logo.png" alt="TPay" onerror="this.style.display='none'">
+      <span>TPay Loyalty</span>
+    </div>
+    <img class="gate-title-img" src="Campaign title - typo.png" alt="Дэлгэр Зуны Бэлэгтэй Аян"
+         onerror="this.style.display='none'">
+    <div class="gate-label">Сугалааны тохирол</div>
+
+    <div class="gate-btns" id="gateBtns">
+      <button class="gate-btn gate-btn-admin" onclick="showPinStep()">
+        🔐 Админ-аар нэвтрэх
+      </button>
+      <button class="gate-btn gate-btn-viewer" onclick="enterViewer()">
+        👁 Сугалааны явц харах
+      </button>
+    </div>
+
+    <div id="pinStep">
+      <div class="pin-label">Админ PIN оруулна уу</div>
+      <input class="pin-input" id="pinInput" type="password"
+             placeholder="••••••••" maxlength="12"
+             onkeydown="if(event.key==='Enter') confirmPin()">
+      <button class="pin-confirm" onclick="confirmPin()">Нэвтрэх →</button>
+      <button class="pin-back" onclick="hidePinStep()">← Буцах</button>
+    </div>
+  </div>
+</div>
+
+<!-- OVERLAY -->
+<div id="overlay">
+  <div class="ov-card">
+    <div class="ov-trophy">🏆</div>
+    <div class="ov-label">ЯЛАГЧ · WINNER</div>
+    <div class="ov-phone"  id="ovPhone"></div>
+    <div class="ov-person" id="ovPerson"></div>
+    <div class="ov-meta">
+      <span id="ovKiosk"></span>
+      <span id="ovDate"></span>
+    </div>
+    <div class="ov-prize-tag" id="ovPrize"></div>
+    <button class="ov-close" onclick="closeOverlay()">✓ Хаах &amp; үргэлжлүүлэх</button>
+  </div>
+</div>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-inner">
+    <a class="nav-logo" href="index.html">
+      <img src="TPay logo.png" alt="TPay" onerror="this.style.display='none'">
+      <span>TPay Loyalty</span>
+    </a>
+    <div class="live-tag"><div class="live-dot"></div> LIVE DRAW</div>
+    <a class="nav-back" href="index.html">← Нүүр</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="hero-banner">
+  <div class="hero-content">
+    <img class="hero-title-img" src="Campaign title - typo.png" alt="Дэлгэр Зуны Бэлэгтэй Аян"
+         onerror="this.style.display='none'">
+    <img class="hero-sub-img"   src="Aztan bolooroi typo.png"   alt="Азтан болоорой"
+         onerror="this.style.display='none'">
+  </div>
+</div>
+
+<!-- CAMPAIGN CARDS (overlapping hero bottom) -->
+<div class="draw-campaigns-wrap">
+  <div class="draw-campaigns">
+
+    <div class="dc-card green">
+      <div class="dc-head">
+        <div class="dc-head-text">
+          <div class="dc-title">Шинэ зээлийн аян</div>
+          <div class="dc-status"><span class="dc-dot"></span>Сугалааны тохирол явагдаж байна</div>
+        </div>
+        <div class="dc-head-icon"><img src="new loan.svg" alt=""></div>
+      </div>
+      <div class="dc-body">
+        <div class="dc-actions">
+          <div class="dc-action">
+            <div class="dc-action-icon"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg></div>
+            <div class="dc-action-text">
+              <span class="dc-action-title">Шинэ зээл авах</span>
+              <span class="dc-action-sub">бүр 1 ширхэг эрхтэй</span>
+            </div>
+          </div>
+        </div>
+        <div class="dc-date">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+          06.20 – 07.05
+        </div>
+      </div>
+    </div>
+
+    <div class="dc-card blue">
+      <div class="dc-head">
+        <div class="dc-head-text">
+          <div class="dc-title">Эргэн төлөлтийн аян</div>
+          <div class="dc-status"><span class="dc-dot"></span>07.06-наас эхлэн үргэлжилж байна</div>
+        </div>
+        <div class="dc-head-icon"><img src="payment.svg" alt=""></div>
+      </div>
+      <div class="dc-body">
+        <div class="dc-actions">
+          <div class="dc-action">
+            <div class="dc-action-icon"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg></div>
+            <div class="dc-action-text">
+              <span class="dc-action-title">Зээл сунгах</span>
+              <span class="dc-action-sub">бүр 1 ширхэг эрхтэй</span>
+            </div>
+          </div>
+          <div class="dc-action">
+            <div class="dc-action-icon"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round"><path d="M5 12a7 7 0 1 0 7-7"/><path d="M5 8v4h4"/></svg></div>
+            <div class="dc-action-text">
+              <span class="dc-action-title">Зээл хаах</span>
+              <span class="dc-action-sub">бүр 2 ширхэг эрхтэй</span>
+            </div>
+          </div>
+        </div>
+        <div class="dc-date">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+          07.06 – 07.31
+        </div>
+      </div>
+    </div>
+
+    <div class="dc-card orange">
+      <div class="dc-head">
+        <div class="dc-head-text">
+          <div class="dc-title">Давтан зээлийн аян</div>
+          <div class="dc-status">⏳ <span id="drawDaysLabel">Удахгүй эхлэх гэж байна</span></div>
+        </div>
+        <div class="dc-head-icon"><img src="repeat loans.svg" alt=""></div>
+      </div>
+      <div class="dc-body">
+        <div class="dc-actions">
+          <div class="dc-action">
+            <div class="dc-action-icon"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
+            <div class="dc-action-text">
+              <span class="dc-action-title">Давтан зээл авах</span>
+              <span class="dc-action-sub">бүр 1 ширхэг эрхтэй</span>
+            </div>
+          </div>
+        </div>
+        <div class="dc-date">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+          08.01 – 08.21
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="page">
+
+  <div class="badge-row">
+    <span>Шинэ зээлийн аян</span>
+    <span id="totalBadge">Ачааллаж байна…</span>
+  </div>
+
+  <!-- TRUST STRIP -->
+  <div class="trust-strip">
+    <div class="trust-badge">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#7bffb0" stroke-width="2.5" stroke-linecap="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+      <span>Санамсаргүй байдлаар тодруулна · Randomness = <span class="trust-highlight">100%</span></span>
+    </div>
+    <div class="trust-badge">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#7bffb0" stroke-width="2.5" stroke-linecap="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+      <span>Web Crypto API · <span class="trust-highlight">crypto.getRandomValues()</span></span>
+    </div>
+    <div class="trust-badge aws">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#f5a623" stroke-width="2.5" stroke-linecap="round"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/></svg>
+      <span>AWS · <span class="trust-highlight">Амазон веб сервисээр баталгаажсан</span></span>
+    </div>
+    <div class="trust-badge pool">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#93c5fd" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+      <span>Нийт <span class="trust-highlight" id="poolSizeBadge">—</span> өгөгдөлөөс санамсаргүй тодруулна</span>
+    </div>
+  </div>
+
+  <!-- PRIZE CARDS (admin only) -->
+  <div class="admin-only" style="width:100%">
+    <div style="font-size:11px;font-weight:700;letter-spacing:1.5px;color:rgba(255,255,255,0.4);text-transform:uppercase;margin-bottom:10px;">
+      Шагналын төрөл сонгох
+    </div>
+    <div class="prize-grid" id="prizeGrid">
+      <!-- rendered by JS -->
+    </div>
+  </div>
+
+  <!-- MACHINE (admin only) -->
+  <div class="machine admin-only">
+    <div class="drum-wrap">
+      <div class="drum-center"></div>
+      <div class="drum" id="drum">
+        <div class="drum-item">— — — — — —</div>
+        <div class="drum-item active" id="displayNum">???? ??**</div>
+        <div class="drum-item">— — — — — —</div>
+      </div>
+    </div>
+    <button class="draw-btn" id="drawBtn" onclick="startDraw()">
+      <span id="btnIcon">🎲</span>
+      <span id="btnText">Сугалаа татах</span>
+    </button>
+  </div>
+
+  <!-- LOG -->
+  <div class="log-section">
+    <div class="log-hdr">
+      <h3>🏅 Ялагчдын жагсаалт</h3>
+      <span class="viewer-badge">👁 Харах горим</span>
+      <button class="clear-btn" onclick="clearAll()">Цэвэрлэх</button>
+    </div>
+    <div class="log-list" id="logList">
+      <div class="empty-state" id="emptyState">Одоогоор ялагч татагдаагүй байна.</div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ── CRYPTO RANDOM ────────────────────────────────────────
+function secureRandInt(max) {
+  // Uses Web Crypto API — cryptographically secure
+  const arr = new Uint32Array(1);
+  crypto.getRandomValues(arr);
+  return arr[0] % max;
+}
+function drawNonce() {
+  const arr = new Uint8Array(6);
+  crypto.getRandomValues(arr);
+  return Array.from(arr).map(b => b.toString(16).padStart(2,'0')).join('');
+}
+
+// ── GATE / AUTH ───────────────────────────────────────────
+const ADMIN_PIN = 'tpay2026';  // ← PIN өөрчлөхийг хүсвэл энд засна уу
+const SESSION_KEY = 'tpay_draw_access';
+
+function initGate() {
+  const saved = sessionStorage.getItem(SESSION_KEY);
+  if (saved === 'admin') { enterAdmin(false); return; }
+  if (saved === 'viewer') { enterViewer(false); return; }
+  // show gate
+}
+
+function showPinStep() {
+  document.getElementById('gateBtns').style.display = 'none';
+  document.getElementById('pinStep').classList.add('show');
+  document.getElementById('pinInput').focus();
+}
+
+function hidePinStep() {
+  document.getElementById('gateBtns').style.display = 'flex';
+  document.getElementById('pinStep').classList.remove('show');
+  const inp = document.getElementById('pinInput');
+  inp.value = '';
+  inp.classList.remove('error');
+}
+
+function confirmPin() {
+  const inp = document.getElementById('pinInput');
+  if (inp.value === ADMIN_PIN) {
+    enterAdmin(true);
+  } else {
+    inp.classList.add('error');
+    inp.value = '';
+    setTimeout(() => inp.classList.remove('error'), 600);
+    inp.focus();
+  }
+}
+
+function enterAdmin(save) {
+  if (save) sessionStorage.setItem(SESSION_KEY, 'admin');
+  document.getElementById('gate').classList.add('hidden');
+}
+
+function enterViewer(save = true) {
+  if (save) sessionStorage.setItem(SESSION_KEY, 'viewer');
+  document.getElementById('gate').classList.add('hidden');
+  document.body.classList.add('viewer');
+}
+
+// ── PRIZES config (ordered as requested) ─────────────────
+const PRIZES = [
+  { id:'woow',   icon:'woow', label:'50,000₮ WOOW худалдан авалтын эрх', total:10 },
+  { id:'loan+',  icon:'📈',   label:'Зээлийн эрх нэмэх',                 total:10 },
+  { id:'close',  icon:'✅',   label:'Зээл хаах эрх',                      total:10 },
+  { id:'chair',  icon:'🪑',   label:'Аяны ширээ сандал, аяга тавагны ком', total:1 },
+  { id:'camp',   icon:'🏕️',   label:'Аяны багц',                          total:1  },
+];
+
+let prizeRemaining = {};
+PRIZES.forEach(p => prizeRemaining[p.id] = p.total);
+
+let selectedPrize = PRIZES[0];
+
+// ── DATA ──────────────────────────────────────────────────
+let pool      = [];
+let remaining = [];
+let winners   = [];
+let isSpinning = false;
+
+const STORAGE_KEY = 'tpay_draw_state';
+
+function saveState() {
+  const drawnPhones = pool
+    .filter(e => !remaining.some(r => r.phone === e.phone && r.date === e.date))
+    .map(e => e.phone + '|' + (e.date || ''));
+  localStorage.setItem(STORAGE_KEY, JSON.stringify({
+    winners,
+    prizeRemaining,
+    drawnPhones,
+    selectedPrizeId: selectedPrize.id
+  }));
+}
+
+function restoreState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return;
+    const s = JSON.parse(raw);
+
+    // restore prize counts
+    if (s.prizeRemaining) prizeRemaining = { ...prizeRemaining, ...s.prizeRemaining };
+
+    // restore selected prize
+    if (s.selectedPrizeId) {
+      const found = PRIZES.find(p => p.id === s.selectedPrizeId);
+      if (found) selectedPrize = found;
+    }
+
+    // restore remaining pool (remove already-drawn)
+    if (s.drawnPhones && s.drawnPhones.length > 0) {
+      const drawnSet = new Set(s.drawnPhones);
+      remaining = pool.filter(e => !drawnSet.has(e.phone + '|' + (e.date || '')));
+    }
+
+    // restore winners log
+    if (s.winners && s.winners.length > 0) {
+      winners = s.winners;
+      document.getElementById('emptyState')?.remove();
+      // render in order (oldest first so newest ends up on top)
+      winners.forEach((w, i) => {
+        addLog(maskPhone(w.phone), nameInitial(w), w.kiosk, w.date, w.prize, i + 1, w.nonce);
+      });
+    }
+  } catch (e) { /* ignore corrupt state */ }
+}
+
+async function loadData() {
+  try {
+    const r = await fetch('draw_data.json?t=' + Date.now());
+    if (!r.ok) throw new Error();
+    const d = await r.json();
+    pool = d.entries || [];
+  } catch { pool = []; }
+  remaining = [...pool];
+  const badge = document.getElementById('totalBadge');
+  badge.textContent = pool.length > 0
+    ? `Нийт ${pool.length} тасалбар оролцож байна`
+    : 'draw_data.json олдсонгүй — convert.py ажиллуулна уу';
+  const poolBadge = document.getElementById('poolSizeBadge');
+  if (poolBadge) poolBadge.textContent = pool.length;
+  if (pool.length === 0) document.getElementById('drawBtn').disabled = true;
+  restoreState();   // ← apply saved state after pool is ready
+  renderPrizes();
+}
+
+// ── PRIZE ICONS (same as index.html prize strip) ─────────
+const PRIZE_ICONS = {
+  'woow': `<img src="woow.png" style="width:40px;height:40px;object-fit:contain;border-radius:10px;" onerror="this.outerHTML='💰'">`,
+  'loan+': `<svg width="44" height="44" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect width="44" height="44" rx="12" fill="#EDE7F6"/>
+    <rect x="9" y="15" width="26" height="17" rx="3" fill="#5E35B1" opacity=".15" stroke="#5E35B1" stroke-width="1.5"/>
+    <rect x="9" y="19" width="26" height="4" fill="#5E35B1" opacity=".25"/>
+    <path d="M28 28v-5M28 23l-2 2M28 23l2 2" stroke="#5E35B1" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+  </svg>`,
+  'close': `<svg width="44" height="44" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect width="44" height="44" rx="12" fill="#E3F2FD"/>
+    <path d="M22 10L12 14v8c0 5.5 4.3 10.7 10 12 5.7-1.3 10-6.5 10-12v-8L22 10Z" fill="#1565C0" opacity=".15" stroke="#1565C0" stroke-width="1.5"/>
+    <path d="M16 22l4 4 8-8" stroke="#1565C0" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+  </svg>`,
+  'chair': `<svg width="44" height="44" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect width="44" height="44" rx="12" fill="#E8F5E9"/>
+    <rect x="10" y="18" width="24" height="4" rx="2" fill="#2E7D32" opacity=".8"/>
+    <line x1="14" y1="22" x2="12" y2="34" stroke="#2E7D32" stroke-width="2" stroke-linecap="round"/>
+    <line x1="30" y1="22" x2="32" y2="34" stroke="#2E7D32" stroke-width="2" stroke-linecap="round"/>
+    <rect x="26" y="26" width="10" height="3" rx="1.5" fill="#388E3C" opacity=".7"/>
+    <line x1="34" y1="22" x2="34" y2="29" stroke="#388E3C" stroke-width="2" stroke-linecap="round"/>
+    <line x1="27" y1="29" x2="27" y2="35" stroke="#388E3C" stroke-width="1.5" stroke-linecap="round"/>
+    <line x1="35" y1="29" x2="35" y2="35" stroke="#388E3C" stroke-width="1.5" stroke-linecap="round"/>
+  </svg>`,
+  'camp': `<svg width="44" height="44" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect width="44" height="44" rx="12" fill="#FFF3E0"/>
+    <path d="M8 34L22 12L36 34H8Z" fill="#FF8C00" opacity=".2"/>
+    <path d="M8 34L22 12L36 34" stroke="#E65100" stroke-width="2" stroke-linejoin="round"/>
+    <path d="M14 34L22 20L30 34" stroke="#FF8C00" stroke-width="2" stroke-linejoin="round"/>
+    <line x1="8" y1="34" x2="36" y2="34" stroke="#E65100" stroke-width="2" stroke-linecap="round"/>
+    <line x1="22" y1="12" x2="22" y2="9" stroke="#E65100" stroke-width="1.5" stroke-linecap="round"/>
+  </svg>`,
+};
+
+// ── PRIZE CARDS ───────────────────────────────────────────
+function renderPrizes() {
+  const grid = document.getElementById('prizeGrid');
+  grid.innerHTML = PRIZES.map((p, i) => {
+    const rem  = prizeRemaining[p.id];
+    const done = rem <= 0;
+    const sel  = selectedPrize.id === p.id;
+    const iconHtml = `<div class="p-icon">${PRIZE_ICONS[p.id] || p.icon}</div>`;
+    return `
+      <div class="prize-card ${sel ? 'selected' : ''} ${done ? 'depleted' : ''}"
+           onclick="selectPrize(${i})">
+        ${rem < p.total ? `<div class="p-remaining">${rem}/${p.total}</div>` : ''}
+        ${iconHtml}
+        <div class="p-name">${p.label}</div>
+        <div class="p-count">${rem}ш</div>
+      </div>`;
+  }).join('');
+}
+
+function selectPrize(idx) {
+  selectedPrize = PRIZES[idx];
+  renderPrizes();
+  saveState();
+}
+
+// ── HELPERS ───────────────────────────────────────────────
+function maskPhone(p) { return p.slice(0,4) + ' ' + p.slice(4,6) + '**'; }
+
+function nameInitial(e) {
+  const s = (e.surname||'').trim(), n = (e.name||'').trim();
+  if (!s && !n) return '';
+  if (!s) return n;
+  if (!n) return s;
+  return s[0] + '.' + n;
+}
+
+function fmtDate(d) { return d ? d.replace(/-/g,'.') : ''; }
+
+function randomMasked() {
+  let s = '';
+  for (let i=0;i<4;i++) s += Math.floor(Math.random()*10);
+  s += ' ';
+  for (let i=0;i<2;i++) s += Math.floor(Math.random()*10);
+  return s + '**';
+}
+
+function setDrum(text) {
+  document.getElementById('drum').innerHTML = `
+    <div class="drum-item">${randomMasked()}</div>
+    <div class="drum-item active">${text}</div>
+    <div class="drum-item">${randomMasked()}</div>`;
+}
+
+// ── DRAW ──────────────────────────────────────────────────
+function startDraw() {
+  if (isSpinning) return;
+  if (remaining.length === 0) { alert('Бүх тасалбар татагдсан!'); return; }
+  if (prizeRemaining[selectedPrize.id] <= 0) {
+    alert(`"${selectedPrize.label}" шагналын тоо дууссан байна!`); return;
+  }
+
+  isSpinning = true;
+  const btn = document.getElementById('drawBtn');
+  btn.classList.add('spinning'); btn.disabled = true;
+  document.getElementById('btnIcon').textContent = '⏳';
+  document.getElementById('btnText').textContent = 'Татаж байна…';
+
+  const idx    = secureRandInt(remaining.length);
+  const chosen = remaining[idx];
+  const nonce  = drawNonce();
+
+  let elapsed = 0;
+  const total = 3400;
+
+  function tick() {
+    const pct   = elapsed / total;
+    const delay = pct < 0.65 ? 55 : 55 + 170 * ((pct - 0.65) / 0.35);
+    setDrum(randomMasked());
+    elapsed += delay;
+    if (elapsed < total) setTimeout(tick, delay);
+    else finalize(chosen, idx);
+  }
+  tick();
+}
+
+function finalize(entry, idx) {
+  remaining.splice(idx, 1);
+  const masked  = maskPhone(entry.phone);
+  const initial = nameInitial(entry);
+  const prize   = selectedPrize;
+
+  setDrum(masked);
+
+  // decrement prize
+  prizeRemaining[prize.id]--;
+  renderPrizes();
+
+  setTimeout(() => {
+    showOverlay(masked, initial, entry.kiosk, entry.date, prize.label);
+    launchConfetti();
+    addLog(masked, initial, entry.kiosk, entry.date, prize.label, winners.length + 1, nonce);
+    winners.push({ ...entry, prize: prize.label, nonce });
+    saveState();
+  }, 300);
+
+  const btn = document.getElementById('drawBtn');
+  btn.classList.remove('spinning'); btn.disabled = false;
+  document.getElementById('btnIcon').textContent = '🎲';
+  document.getElementById('btnText').textContent =
+    remaining.length > 0 ? 'Дараагийн сугалаа' : '✓ Дуусгавар';
+  isSpinning = false;
+}
+
+// ── OVERLAY ───────────────────────────────────────────────
+function showOverlay(phone, person, kiosk, loanDate, prizeLabel) {
+  document.getElementById('ovPhone').textContent  = phone;
+  document.getElementById('ovPerson').textContent = person || '';
+  document.getElementById('ovKiosk').innerHTML    = kiosk    ? `🏧 ${kiosk}` : '';
+  document.getElementById('ovDate').innerHTML     = loanDate ? `📅 ${fmtDate(loanDate)}` : '';
+  document.getElementById('ovPrize').textContent  = prizeLabel;
+  document.getElementById('overlay').classList.add('show');
+}
+function closeOverlay() { document.getElementById('overlay').classList.remove('show'); }
+document.getElementById('overlay').addEventListener('click', e => { if(e.target===document.getElementById('overlay')) closeOverlay(); });
+
+// ── LOG ───────────────────────────────────────────────────
+function addLog(phone, person, kiosk, loanDate, prizeLabel, rank, nonce) {
+  document.getElementById('emptyState')?.remove();
+  const list = document.getElementById('logList');
+  const now  = new Date();
+  const time = `${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}:${now.getSeconds().toString().padStart(2,'0')}`;
+  const rc   = rank===1?'gold':rank===2?'silver':rank===3?'bronze':'';
+  const row  = document.createElement('div');
+  row.className = 'log-row';
+  row.innerHTML = `
+    <div class="log-rank ${rc}">${rank}</div>
+    <div class="log-info">
+      <div class="log-phone">${phone}</div>
+      <div class="log-name">${[person, kiosk?'🏧 '+kiosk:''].filter(Boolean).join(' · ')}</div>
+      ${nonce ? `<div class="log-nonce">🔐 #${nonce} · ${time}</div>` : ''}
+    </div>
+    <div class="log-right">
+      <div class="log-prize">${prizeLabel}</div>
+      <div class="log-date">${loanDate ? fmtDate(loanDate) : time}</div>
+    </div>`;
+  list.insertBefore(row, list.firstChild);
+}
+
+function clearAll() {
+  if (!confirm('Ялагчдын жагсаалт болон шагналын тоог reset хийх үү?')) return;
+  winners = []; remaining = [...pool];
+  PRIZES.forEach(p => prizeRemaining[p.id] = p.total);
+  localStorage.removeItem(STORAGE_KEY);
+  renderPrizes();
+  document.getElementById('logList').innerHTML =
+    '<div class="empty-state" id="emptyState">Одоогоор ялагч татагдаагүй байна.</div>';
+  setDrum('???? ??**');
+  document.getElementById('btnText').textContent = 'Сугалаа татах';
+}
+
+// ── CONFETTI ──────────────────────────────────────────────
+const canvas = document.getElementById('confettiCanvas');
+const ctx    = canvas.getContext('2d');
+let particles = [];
+
+function launchConfetti() {
+  canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+  const colors = ['#f5c400','#2ec65a','#f5832e','#fff','#7bffb0','#ff6b6b','#60a5fa','#c084fc','#fbbf24'];
+  particles = [];
+  for (let i=0;i<240;i++) {
+    particles.push({
+      x:Math.random()*canvas.width, y:-10-Math.random()*100,
+      w:Math.random()*12+4, h:Math.random()*5+3,
+      color:colors[i%colors.length],
+      vx:(Math.random()-.5)*8, vy:Math.random()*4+2,
+      rot:Math.random()*360, vr:(Math.random()-.5)*10,
+      opacity:1
+    });
+  }
+  animateConfetti();
+}
+
+function animateConfetti() {
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  particles = particles.filter(p=>p.opacity>0.01);
+  particles.forEach(p=>{
+    p.x+=p.vx; p.y+=p.vy; p.rot+=p.vr; p.vy+=0.13;
+    if(p.y>canvas.height*.72) p.opacity-=0.022;
+    ctx.save();
+    ctx.globalAlpha=p.opacity;
+    ctx.translate(p.x,p.y); ctx.rotate(p.rot*Math.PI/180);
+    ctx.fillStyle=p.color; ctx.fillRect(-p.w/2,-p.h/2,p.w,p.h);
+    ctx.restore();
+  });
+  if(particles.length>0) requestAnimationFrame(animateConfetti);
+  else ctx.clearRect(0,0,canvas.width,canvas.height);
+}
+
+// countdown for orange card
+(function() {
+  const target = new Date('2026-08-01');
+  const today  = new Date(); today.setHours(0,0,0,0);
+  const days   = Math.round((target - today) / 86400000);
+  const el     = document.getElementById('drawDaysLabel');
+  if (!el) return;
+  if (days > 0)       el.textContent = days + ' хоногийн дараа эхлэх гэж байна';
+  else if (days === 0) el.textContent = 'Өнөөдөр эхэлж байна!';
+  else                el.textContent = 'Аян үргэлжилж байна';
+})();
+
+initGate();
+loadData();
+</script>
+</body>
+</html>

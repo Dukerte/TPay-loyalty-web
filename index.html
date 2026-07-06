@@ -144,54 +144,99 @@
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       gap: 16px;
-      margin-top: -32px;
+      margin-top: -36px;
       position: relative;
       z-index: 10;
     }
     .c-card {
-      background: var(--white);
-      border-radius: var(--radius);
-      padding: 22px 20px 20px;
-      box-shadow: 0 4px 24px rgba(0,0,0,0.10);
-      border-top: 4px solid transparent;
+      background: #fff;
+      border-radius: 20px;
+      box-shadow: 0 4px 28px rgba(0,0,0,0.10);
       transition: transform .2s, box-shadow .2s;
+      display: flex; flex-direction: column;
+      overflow: hidden;
     }
-    .c-card:hover { transform: translateY(-4px); box-shadow: 0 12px 36px rgba(0,0,0,0.13); }
-    .c-card.green  { border-top-color: var(--green); }
-    .c-card.blue   { border-top-color: var(--blue); }
-    .c-card.orange { border-top-color: var(--orange); }
+    .c-card:hover { transform: translateY(-4px); box-shadow: 0 12px 40px rgba(0,0,0,0.14); }
 
-    .c-pill {
-      display: inline-flex; align-items: center;
-      border-radius: 50px;
-      padding: 3px 12px;
-      font-size: 12px; font-weight: 700;
-      margin-bottom: 14px;
+    /* colored header band */
+    .c-head {
+      padding: 16px 20px 14px;
+      display: flex; flex-direction: row; align-items: center; gap: 10px;
     }
-    .pill-green  { background: #e8fff0; color: #0a7a2e; border: 1.5px solid var(--green); }
-    .pill-blue   { background: #eef2ff; color: var(--blue); border: 1.5px solid var(--blue); }
-    .pill-orange { background: #fff3ed; color: #b84000; border: 1.5px solid var(--orange); }
+    .c-head-text { display: flex; flex-direction: column; gap: 8px; flex: 1; min-width: 0; }
+    .c-head-icon { flex-shrink: 0; display: flex; align-items: center; }
+    .c-head-icon img { width: 28px; height: 28px; object-fit: contain; opacity: 0.55; }
+    .c-card.green  .c-head { background: linear-gradient(135deg, #17b81a, #0d9e10); }
+    .c-card.blue   .c-head { background: linear-gradient(135deg, #1847f0, #0932cc); }
+    .c-card.orange .c-head { background: linear-gradient(145deg, #ee3520, #f5920e); }
 
-    .c-icon {
-      width: 52px; height: 52px; border-radius: 14px;
+    .c-card h3 {
+      font-size: 17px; font-weight: 900; color: #fff;
+      line-height: 1.2; margin: 0;
+    }
+    .c-status {
+      display: inline-flex; align-items: center; gap: 5px;
+      font-size: 11px; font-weight: 700;
+      background: rgba(0,0,0,0.2);
+      border-radius: 50px; padding: 3px 10px;
+      color: #fff; width: fit-content;
+    }
+    .c-status-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: #fde047; flex-shrink: 0;
+      animation: blink 1.4s ease-in-out infinite;
+    }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.2} }
+
+    /* white body */
+    .c-body {
+      padding: 16px 20px 18px;
+      display: flex; flex-direction: column; gap: 14px; flex: 1;
+    }
+
+    /* action rows */
+    .c-actions { display: flex; gap: 0; flex: 1; }
+    .c-action {
+      display: flex; align-items: center; gap: 10px;
+      flex: 1; padding: 10px 14px;
+      background: #f8faff; border-radius: 12px;
+      border: 1px solid #e8edf8;
+    }
+    .c-card.green  .c-action { background: #f0fff4; border-color: #c6f0cc; }
+    .c-card.blue   .c-action { background: #f0f4ff; border-color: #c8d4fc; }
+    .c-card.orange .c-action { background: #fff5f0; border-color: #fcd9c6; }
+    .c-action + .c-action { margin-left: 8px; }
+
+    .c-action-icon {
+      width: 30px; height: 30px; border-radius: 50%;
       display: flex; align-items: center; justify-content: center;
-      margin-bottom: 14px;
+      flex-shrink: 0;
     }
-    .ci-green  { background: #e8fff0; }
-    .ci-blue   { background: #eef2ff; }
-    .ci-orange { background: #fff3ed; }
+    .c-card.green  .c-action-icon { background: #17b81a; }
+    .c-card.blue   .c-action-icon { background: #1847f0; }
+    .c-card.orange .c-action-icon { background: #ee3520; }
 
-    .c-card h3 { font-size: 16px; font-weight: 800; color: var(--blue-dark); margin-bottom: 8px; }
-    .c-card p  { font-size: 13px; color: var(--muted); line-height: 1.6; margin-bottom: 16px; }
+    .c-action-text { display: flex; flex-direction: column; gap: 1px; }
+    .c-action-title {
+      font-size: 12px; font-weight: 800; line-height: 1.2;
+    }
+    .c-card.green  .c-action-title { color: #0a7a10; }
+    .c-card.blue   .c-action-title { color: #0a2fd4; }
+    .c-card.orange .c-action-title { color: #c02800; }
+    .c-action-sub {
+      font-size: 10.5px; color: #6b7280; line-height: 1.3;
+    }
 
     .c-date {
-      display: inline-flex; align-items: center; gap: 6px;
-      border-radius: 50px; padding: 5px 14px;
-      font-size: 12px; font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+      gap: 6px;
+      border-radius: 50px; padding: 7px 20px;
+      font-size: 13px; font-weight: 800;
+      letter-spacing: 0.3px;
     }
-    .cd-green  { background: #e8fff0; color: #0a7a2e; border: 1px solid var(--green); }
-    .cd-blue   { background: #eef2ff; color: var(--blue); border: 1px solid var(--blue); }
-    .cd-orange { background: #fff3ed; color: #b84000; border: 1px solid var(--orange); }
+    .c-card.green  .c-date { background: #e8fff0; color: #0a7a10; border: 1.5px solid #c6f0cc; }
+    .c-card.blue   .c-date { background: #eef2ff; color: #0a2fd4; border: 1.5px solid #c8d4fc; }
+    .c-card.orange .c-date { background: #fff3ee; color: #c02800; border: 1.5px solid #fcd9c6; }
 
     /* ══════════════════════════════
        STATS BANNER
@@ -563,6 +608,7 @@
       <a href="#campaigns" class="active">Аян</a>
       <a href="#lookup">Сугалааны эрх шалгах</a>
       <a href="#faq">Түгээмэл асуулт</a>
+      <a href="draw.html" style="color:#2ec65a;font-weight:700;">🎰 Тохирол</a>
     </div>
     <div class="nav-url">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
@@ -597,59 +643,122 @@
   <!-- Campaign Cards -->
   <div class="campaigns" id="campaigns">
 
+    <!-- GREEN: Шинэ зээлийн аян -->
     <div class="c-card green">
-      <span class="c-pill pill-green">6-р сар</span>
-      <div class="c-icon ci-green">
-        <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
-          <circle cx="14" cy="14" r="10" fill="#2ec65a" opacity=".15"/>
-          <path d="M14 7v14M7 14h14" stroke="#2ec65a" stroke-width="2.5" stroke-linecap="round"/>
-          <circle cx="14" cy="14" r="3" fill="#2ec65a"/>
-        </svg>
+      <div class="c-head">
+        <div class="c-head-text">
+          <h3>Шинэ зээлийн аян</h3>
+          <div class="c-status">
+            <div class="c-status-dot"></div>
+            Сугалааны тохирол явагдаж байна
+          </div>
+        </div>
+        <div class="c-head-icon"><img src="new loan.svg" alt=""></div>
       </div>
-      <h3>Шинэ зээлийн аян</h3>
-      <p>06.20–07.05 хооронд <strong>шинэ зээл</strong> авах бүрт сугалааны эрх дагалдана.</p>
-      <span class="c-date cd-green">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
-        06.20 – 07.05
-      </span>
+      <div class="c-body">
+        <div class="c-actions">
+          <div class="c-action">
+            <div class="c-action-icon">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg>
+            </div>
+            <div class="c-action-text">
+              <span class="c-action-title">Шинэ зээл авах</span>
+              <span class="c-action-sub">бүр 1 ширхэг сугалааны эрхтэй</span>
+            </div>
+          </div>
+        </div>
+        <div class="c-date">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+          06.20 – 07.05
+        </div>
+      </div>
     </div>
 
+    <!-- BLUE: Эргэн төлөлтийн аян -->
     <div class="c-card blue">
-      <span class="c-pill pill-blue">7-р сар</span>
-      <div class="c-icon ci-blue">
-        <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
-          <path d="M5 14a9 9 0 0 1 15.36-6.36L22 6" stroke="#1a3bbf" stroke-width="2.3" stroke-linecap="round"/>
-          <path d="M22 6v4.5H17.5" stroke="#1a3bbf" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/>
-          <path d="M23 14a9 9 0 0 1-15.36 6.36L6 22" stroke="#1a3bbf" stroke-width="2.3" stroke-linecap="round"/>
-          <path d="M6 22v-4.5H10.5" stroke="#1a3bbf" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
+      <div class="c-head">
+        <div class="c-head-text">
+          <h3>Эргэн төлөлтийн аян</h3>
+          <div class="c-status">
+            <div class="c-status-dot"></div>
+            07.06-наас эхлэн үргэлжилж байна
+          </div>
+        </div>
+        <div class="c-head-icon"><img src="payment.svg" alt=""></div>
       </div>
-      <h3>Эргэн төлөлтийн аян</h3>
-      <p>07.06–07.31 хооронд зээлийн <strong>эргэн төлөлт</strong> бүрт сугалааны эрх дагалдана.</p>
-      <span class="c-date cd-blue">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
-        07.06 – 07.31
-      </span>
+      <div class="c-body">
+        <div class="c-actions">
+          <div class="c-action">
+            <div class="c-action-icon">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
+            </div>
+            <div class="c-action-text">
+              <span class="c-action-title">Зээл сунгах</span>
+              <span class="c-action-sub">бүр 1 ширхэг сугалааны эрхтэй</span>
+            </div>
+          </div>
+          <div class="c-action">
+            <div class="c-action-icon">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round"><path d="M5 12a7 7 0 1 0 7-7"/><path d="M5 8v4h4"/></svg>
+            </div>
+            <div class="c-action-text">
+              <span class="c-action-title">Зээл хаах</span>
+              <span class="c-action-sub">бүр 2 ширхэг сугалааны эрхтэй</span>
+            </div>
+          </div>
+        </div>
+        <div class="c-date">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+          07.06 – 07.31
+        </div>
+      </div>
     </div>
 
+    <!-- ORANGE: Давтан зээлийн аян -->
     <div class="c-card orange">
-      <span class="c-pill pill-orange">8-р сар</span>
-      <div class="c-icon ci-orange">
-        <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
-          <rect x="5" y="9" width="18" height="13" rx="3" stroke="#f5832e" stroke-width="2.3"/>
-          <path d="M10 9V7.5a4 4 0 0 1 8 0V9" stroke="#f5832e" stroke-width="2.3" stroke-linecap="round"/>
-          <path d="M11 16l2 2 4-4" stroke="#f5832e" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
+      <div class="c-head">
+        <div class="c-head-text">
+          <h3>Давтан зээлийн аян</h3>
+          <div class="c-status">
+            ⏳ <span id="daysLabel">Удахгүй эхлэх гэж байна</span>
+          </div>
+        </div>
+        <div class="c-head-icon"><img src="repeat loans.svg" alt=""></div>
       </div>
-      <h3>Давтан зээлийн аян</h3>
-      <p>08.01–08.21 хооронд <strong>давтан зээл</strong> авах бүрт сугалааны эрх дагалдана.</p>
-      <span class="c-date cd-orange">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
-        08.01 – 08.21
-      </span>
+      <div class="c-body">
+        <div class="c-actions">
+          <div class="c-action">
+            <div class="c-action-icon">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            </div>
+            <div class="c-action-text">
+              <span class="c-action-title">Давтан зээл авах</span>
+              <span class="c-action-sub">бүр 1 ширхэг сугалааны эрхтэй</span>
+            </div>
+          </div>
+        </div>
+        <div class="c-date">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+          08.01 – 08.21
+        </div>
+      </div>
     </div>
 
   </div><!-- /campaigns -->
+
+  <script>
+    // Dynamic countdown for Aug 1
+    (function() {
+      const target = new Date('2026-08-01');
+      const today  = new Date(); today.setHours(0,0,0,0);
+      const days   = Math.round((target - today) / 86400000);
+      const el     = document.getElementById('daysLabel');
+      if (!el) return;
+      if (days > 0)      el.textContent = days + ' хоногийн дараа эхлэх гэж байна';
+      else if (days === 0) el.textContent = 'Өнөөдөр эхэлж байна!';
+      else                el.textContent = 'Аян үргэлжилж байна';
+    })();
+  </script>
 
   <!-- Live Stats Banner -->
   <div class="stats-banner" id="statsBanner" style="display:none;">

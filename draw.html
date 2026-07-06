@@ -62,11 +62,22 @@
     }
     .nav-back:hover { background:rgba(255,255,255,0.1); color:#fff; }
 
+    /* Center title — only shown on mobile */
+    .nav-title {
+      display: none;
+      position: absolute; left: 50%; transform: translateX(-50%);
+      font-size: 14px; font-weight: 800; color: #fff;
+      white-space: nowrap; pointer-events: none;
+    }
+
     @media (max-width: 480px) {
-      .nav-logo span { display: none; }
+      .nav-inner { padding: 0 14px; position: relative; }
+      .nav-logo { display: none; }              /* hide logo */
+      .nav-title { display: block; }            /* show centered title */
+      .nav-back { margin-left: 0; order: -1; }  /* move ← to far left */
       .nav-back span { display: none; }
       .nav-back::before { content: '←'; }
-      .nav-inner { gap: 8px; padding: 0 14px; }
+      .live-tag { order: 1; margin-left: auto; } /* push LIVE to far right */
     }
 
     /* ── HERO BANNER ───────────────────────── */
@@ -689,6 +700,7 @@
       <span>TPay Loyalty</span>
     </a>
     <div class="live-tag"><div class="live-dot"></div> LIVE DRAW</div>
+    <span class="nav-title">Тохирол</span>
     <a class="nav-back" href="index.html"><span>← Нүүр</span></a>
   </div>
 </nav>

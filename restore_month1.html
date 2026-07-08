@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="mn">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TPay – 1-р сарын ялагчдыг сэргээх</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(160deg, #05103a 0%, #0a1f6e 50%, #0d2d8a 100%);
+      min-height: 100vh; color: #fff;
+      display: flex; align-items: center; justify-content: center; padding: 24px;
+    }
+    .card {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.14);
+      border-radius: 24px; padding: 40px 32px 36px;
+      max-width: 480px; width: 100%; text-align: center;
+      box-shadow: 0 24px 80px rgba(0,0,0,0.4);
+    }
+    .icon { font-size: 52px; margin-bottom: 14px; }
+    h2 { font-size: 20px; font-weight: 800; margin-bottom: 8px; }
+    .sub { font-size: 13px; color: rgba(255,255,255,0.5); line-height: 1.6; margin-bottom: 28px; }
+    .count { font-size: 32px; font-weight: 900; color: #f5c400; }
+    .count-label { font-size: 12px; color: rgba(255,255,255,0.4); margin-bottom: 28px; }
+    .btn {
+      width: 100%; height: 54px; border: none; border-radius: 14px;
+      background: linear-gradient(135deg, #2ec65a, #18a83c);
+      color: #fff; font-size: 16px; font-weight: 800; cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      box-shadow: 0 6px 24px rgba(46,198,90,0.4);
+      transition: transform .15s, box-shadow .15s;
+    }
+    .btn:hover { transform: translateY(-2px); box-shadow: 0 10px 32px rgba(46,198,90,0.5); }
+    .btn:disabled { opacity: .5; cursor: not-allowed; transform: none !important; }
+    .status {
+      margin-top: 18px; font-size: 14px; font-weight: 700;
+      color: #7bffb0; min-height: 22px;
+    }
+    .warning {
+      background: rgba(245,131,46,0.12); border: 1px solid rgba(245,131,46,0.3);
+      border-radius: 12px; padding: 12px 16px;
+      font-size: 12px; color: #fcd9a8; line-height: 1.5;
+      margin-bottom: 20px; text-align: left;
+    }
+  </style>
+</head>
+<body>
+<div class="card">
+  <div class="icon">🏆</div>
+  <h2>1-р сарын ялагчдыг сэргээх</h2>
+  <p class="sub">Шинэ зээлийн аян (2026.06.20–07.05)<br>Скриншотоос гарган авсан 32 ялагч</p>
+  <div class="count">32</div>
+  <div class="count-label">ялагч сэргээгдэх болно</div>
+  <div class="warning">
+    ⚠️ Энэ хуудас <strong>draw.html</strong>-тай нэг домайн дээр нээгдэх ёстой.<br>
+    Одоогийн localStorage-ийн өгөгдлийг <strong>бүрэн дарж бичнэ</strong>. Эхлэхийн өмнө одоогийн өгөгдлийг нөөцлөх хэрэгтэй бол draw.html дээрх 💾 товчийг дарна уу.
+  </div>
+  <button class="btn" id="restoreBtn" onclick="restore()">✓ 32 ялагч сэргээх</button>
+  <div class="status" id="status"></div>
+</div>
+
+<script>
+// ── 32 winners reconstructed from screenshots ─────────────
+// _display = pre-masked phone, _person = formatted name
+const WINNERS = [
+  // ── Rank 1–10 · 50,000₮ WOOW худалдан авалтын эрх ───────
+  { _display:'8826 61**', _person:'Б.НЭРГҮЙ',       kiosk:'Шинэ сансар зах',            date:'2026-06-27', prize:'50,000₮ WOOW худалдан авалтын эрх',   nonce:'94d62704d92d' },
+  { _display:'9591 76**', _person:'Г.ШИНЭЖАРГАЛ',   kiosk:'Шинэ сансар зах',            date:'2026-07-03', prize:'50,000₮ WOOW худалдан авалтын эрх',   nonce:'7449490462c8' },
+  { _display:'8685 70**', _person:'Г.ШИНЭГЭРЭЛ',    kiosk:'Тахилт зах',                 date:'2026-06-21', prize:'50,000₮ WOOW худалдан авалтын эрх',   nonce:'f3622df39257' },
+  { _display:'9557 71**', _person:'Л.ОДХУУ',         kiosk:'Асайт ХТ',                  date:'2026-06-22', prize:'50,000₮ WOOW худалдан авалтын эрх',   nonce:'6d4ac65b87a8' },
+  { _display:'8612 10**', _person:'Н.ЭНХЖАРГАЛ',    kiosk:'Шархад эцэс Миний дэлгүүр', date:'2026-06-26', prize:'50,000₮ WOOW худалдан авалтын эрх',   nonce:'ada0e3104016' },
+  { _display:'8063 14**', _person:'Б.ЭНХМЭНД',      kiosk:'Сансар 32',                  date:'2026-06-23', prize:'50,000₮ WOOW худалдан авалтын эрх',   nonce:'75835ea67f87' },
+  { _display:'9034 36**', _person:'О.ГАНТУЛГА',      kiosk:'Хөвсгөл тэвхэн',            date:'2026-06-23', prize:'50,000₮ WOOW худалдан авалтын эрх',   nonce:'1bdc9ec7a911' },
+  { _display:'9952 81**', _person:'Г.ЦОГБАДРАХ',    kiosk:'Тахилт Миний дэлгүүр',       date:'2026-06-24', prize:'50,000₮ WOOW худалдан авалтын эрх',   nonce:'6e2d7e2e1eed' },
+  { _display:'9119 76**', _person:'Б.ӨНӨБОЛД',      kiosk:'Төгөлдөр төв',               date:'2026-06-23', prize:'50,000₮ WOOW худалдан авалтын эрх',   nonce:'fb35c01246d8' },
+  { _display:'8019 67**', _person:'С.ЦЭРЭННОРОВ',   kiosk:'Дархан ОУХТ',               date:'2026-06-23', prize:'50,000₮ WOOW худалдан авалтын эрх',   nonce:'f880b9f23bf6' },
+
+  // ── Rank 11–20 · Зээлийн эрх нэмэх ──────────────────────
+  { _display:'9426 10**', _person:'Э.ХҮРЭЛ-ОЧИР',   kiosk:'Тэнгэр плаза',               date:'2026-07-05', prize:'Зээлийн эрх нэмэх', nonce:'1ad5c9ecdb8e' },
+  { _display:'9456 57**', _person:'С.ОТГОНБАЯР',    kiosk:'Дарь эх шинэ буудал',        date:'2026-06-21', prize:'Зээлийн эрх нэмэх', nonce:'6eb60ee83a2a' },
+  { _display:'9957 49**', _person:'Б.ДАВААЖАРГАЛ',  kiosk:'Дархан ОУХТ',               date:'2026-06-29', prize:'Зээлийн эрх нэмэх', nonce:'784404f3b956' },
+  { _display:'8012 63**', _person:'Б.ИЖИЛЦЭЦЭГ',   kiosk:'Баянхошуу эцэс М март',      date:'2026-06-24', prize:'Зээлийн эрх нэмэх', nonce:'0cc75d73e756' },
+  { _display:'8511 70**', _person:'Б.ОРХОНТУЯА',    kiosk:'Хэнтий авто буудал',         date:'2026-07-03', prize:'Зээлийн эрх нэмэх', nonce:'a70e46c70a9c' },
+  { _display:'8955 54**', _person:'И.ДАШДОРЖ',      kiosk:'Асайт ХТ',                  date:'2026-06-20', prize:'Зээлийн эрх нэмэх', nonce:'1e255762f686' },
+  { _display:'8040 31**', _person:'О.МӨНХЗУЛ',      kiosk:'Баянхошуу эцэс М март',      date:'2026-06-28', prize:'Зээлийн эрх нэмэх', nonce:'0205e262d1c0' },
+  { _display:'9935 25**', _person:'Н.ГАН-ЭРДЭНЭ',  kiosk:'Эрдэнэт өргөө',             date:'2026-06-28', prize:'Зээлийн эрх нэмэх', nonce:'d4c96502faca' },
+  { _display:'9670 56**', _person:'А.АЛТАНГЭРЭЛ',   kiosk:'И март хороолол',            date:'2026-06-27', prize:'Зээлийн эрх нэмэх', nonce:'a6d122dd49c7' },
+  { _display:'9087 86**', _person:'Э.НАНДИНЦЭЦЭГ', kiosk:'Нисэх Янгир ХУТ',            date:'2026-06-25', prize:'Зээлийн эрх нэмэх', nonce:'8988a511eecb' },
+
+  // ── Rank 21–30 · Зээл хаах эрх ──────────────────────────
+  { _display:'8096 42**', _person:'Б.ДЭЛГЭРМАА',   kiosk:'Шинэ сансар зах',            date:'2026-06-22', prize:'Зээл хаах эрх', nonce:'2ad1aa5914ba' },
+  { _display:'8918 30**', _person:'Д.УРТНАСАН',     kiosk:'Баянхошуу эцэс М март',      date:'2026-06-30', prize:'Зээл хаах эрх', nonce:'31547d3a26c9' },
+  { _display:'9444 41**', _person:'А.МӨНХБИЛЭГ',   kiosk:'Тэнгис',                     date:'2026-07-02', prize:'Зээл хаах эрх', nonce:'e002cf0d5049' },
+  { _display:'9101 11**', _person:'М.ЭНХТУЯА',      kiosk:'Тэнгэр плаза',               date:'2026-06-30', prize:'Зээл хаах эрх', nonce:'2e99cf593121' },
+  { _display:'9678 85**', _person:'А.ОЮУН-ЭРДЭНЭ', kiosk:'7 буудал Аму плаза',         date:'2026-06-26', prize:'Зээл хаах эрх', nonce:'289ff9da7c57' },
+  { _display:'9808 48**', _person:'Ч.НАСАНЖАРГАЛ', kiosk:'Дарь эх шинэ буудал',         date:'2026-06-29', prize:'Зээл хаах эрх', nonce:'209d09a064e8' },
+  { _display:'9586 38**', _person:'Г.АРИУНБАЯР',   kiosk:'Буян налайх',                date:'2026-06-29', prize:'Зээл хаах эрх', nonce:'c90db758a05c' },
+  { _display:'8860 34**', _person:'Ч.ЭРХЭМЦЭЦЭГ', kiosk:'Сэлэнгэ ОУХТ',               date:'2026-06-20', prize:'Зээл хаах эрх', nonce:'6b941d6f2e2a' },
+  { _display:'8979 24**', _person:'Г.БАТБАЯР',      kiosk:'Хэнтий авто буудал',         date:'2026-06-22', prize:'Зээл хаах эрх', nonce:'afa769a8ffb8' },
+  { _display:'8957 18**', _person:'Ц.ХОНГОРЗУЛ',   kiosk:'Дорнод Номин',               date:'2026-06-30', prize:'Зээл хаах эрх', nonce:'faa89040afaa' },
+
+  // ── Rank 31 · Аяны ширээ сандал ──────────────────────────
+  { _display:'8544 70**', _person:'Г.ЛУВСАНЖАМЦ',  kiosk:'Саппоро миний дэлгүүр',      date:'2026-06-21', prize:'Аяны ширээ сандал, аяга тавагны ком', nonce:'1456ed70ab74' },
+
+  // ── Rank 32 · Аяны багц ──────────────────────────────────
+  { _display:'9963 65**', _person:'Ж.БААСАНЖАВ',   kiosk:'И март хороолол',             date:'2026-06-21', prize:'Аяны багц', nonce:'e4fd3785b9ca' },
+];
+
+function restore() {
+  const btn = document.getElementById('restoreBtn');
+  btn.disabled = true;
+  const state = {
+    winners: WINNERS,
+    prizeRemaining: { woow: 0, 'loan+': 0, close: 0, chair: 0, camp: 0 },
+    drawnPhones: [],
+    selectedPrizeId: 'camp',
+    locked: true   // lock so no accidental draws
+  };
+  localStorage.setItem('tpay_draw_state', JSON.stringify(state));
+  document.getElementById('status').textContent = '✓ ' + WINNERS.length + ' ялагч амжилттай сэргээлээ!';
+  setTimeout(function() { window.location.href = 'draw.html'; }, 1800);
+}
+</script>
+</body>
+</html>

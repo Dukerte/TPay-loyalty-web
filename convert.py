@@ -1,20 +1,28 @@
 #!/usr/bin/env python3
 """
-TPay Loyalty – Excel → data.json + draw_data.json converter
-============================================================
+TPay Loyalty – Excel → data.json / data2.json + draw_data.json converter
+=========================================================================
 Хэрэглээ / Usage:
-  python3 convert.py raffle_data_updated.xlsx
+  1-р сарын аян (Шинэ зээлийн):
+    python3 convert.py month1_data.xlsx
+
+  2-р сарын аян (Эргэн төлөлтийн):
+    python3 convert.py month2_data.xlsx --month 2
+
+  3-р сарын аян (Давтан зээлийн):
+    python3 convert.py month3_data.xlsx --month 3
 
 Excel файлын формат (5 багана):
   A: Харилцагч нэр      (жш: САРАНЦЭЦЭГ)
   B: Харилцагч овог     (жш: Энхтөр)
   C: Харилцагч утас     (жш: 96449901)
   D: Киоск нэр          (жш: KIOSK 32)
-  E: Зээл авсан огноо   (жш: 2026-06-25)
+  E: Зээл авсан огноо   (жш: 2026-07-10)
 
 Гаралт:
-  data.json       → index.html-д зориулсан утасны тоолол
-  draw_data.json  → draw.html-д зориулсан дэлгэрэнгүй мэдээлэл
+  --month 1 (default) → data.json  + draw_data.json
+  --month 2           → data2.json + draw_data2.json
+  --month 3           → data3.json + draw_data3.json
 """
 
 import sys
@@ -70,7 +78,9 @@ def detect_format(headers):
     return "old"
 
 
-def convert(excel_path: str) -> None:
+def convert(excel_path: str, month: int = 1) -> None:
+    suffix = "" if month == 1 else str(month)
+    print(f"\n📋 {month}-р сарын аян → data{suffix}.json / draw_data{suffix}.json\n")
     if not os.path.exists(excel_path):
         print(f"Файл олдсонгүй: {excel_path}")
         sys.exit(1)
@@ -143,56 +153,47 @@ def convert(excel_path: str) -> None:
     unique_phones    = len(phone_counts)
     today            = str(date.today())
 
-    # ── Write data.json (for index.html lookup + stats) ───
+    # ── Write dataN.json (for index.html lookup + stats) ──
     data_json = {
         "_updated": today,
-        "_note": "convert.py ашиглан үүсгэсэн.",
+        "_note": f"convert.py --month {month} ашиглан үүсгэсэн.",
     }
     data_json.update(phone_counts)
 
-    data_json_path = os.path.join(base_dir, "data.json")
+    data_json_path = os.path.join(base_dir, f"data{suffix}.json")
     with open(data_json_path, "w", encoding="utf-8") as f:
         json.dump(data_json, f, ensure_ascii=False, indent=2)
 
-    # ── Write draw_data.json (for draw.html) ──────────────
+    # ── Write draw_dataN.json (for draw.html) ─────────────
     draw_json = {
         "_updated": today,
         "_total_tickets": total_tickets,
         "_unique_phones": unique_phones,
         "entries": entries
     }
-    draw_json_path = os.path.join(base_dir, "draw_data.json")
+    draw_json_path = os.path.join(base_dir, f"draw_data{suffix}.json")
     with open(draw_json_path, "w", encoding="utf-8") as f:
         json.dump(draw_json, f, ensure_ascii=False, indent=2)
 
-    print(f"\n✅  Амжилттай үүслээ")
+    print(f"✅  Амжилттай үүслээ")
     print(f"   Нийт тасалбар:     {total_tickets}")
     print(f"   Өвөрмөц харилцагч: {unique_phones}")
     print(f"   Алгасав:           {skipped}")
-    print(f"   data.json:         {data_json_path}")
-    print(f"   draw_data.json:    {draw_json_path}")
-
-    # ── Patch index.html inline fallback ──────────────────
-    html_path = os.path.join(base_dir, "index.html")
-    if os.path.exists(html_path):
-        phone_only   = {k: v for k, v in data_json.items() if not k.startswith("_")}
-        inline_json  = json.dumps(phone_only, ensure_ascii=False)
-        with open(html_path, "r", encoding="utf-8") as f:
-            html = f.read()
-        patched = re.sub(
-            r'let raffleData = \{[^;]*\};',
-            f'let raffleData = {inline_json};',
-            html
-        )
-        if patched != html:
-            with open(html_path, "w", encoding="utf-8") as f:
-                f.write(patched)
-            print(f"   index.html inline дата шинэчлэгдлээ ✓")
+    print(f"   {data_json_path}")
+    print(f"   {draw_json_path}")
     print()
 
 
 if __name__ == "__main__":
-    if len(sys.argv) < 2:
+    args = [a for a in sys.argv[1:] if not a.startswith("--")]
+    month_arg = 1
+    for i, a in enumerate(sys.argv[1:]):
+        if a == "--month" and i + 2 < len(sys.argv):
+            try:
+                month_arg = int(sys.argv[i + 2])
+            except ValueError:
+                pass
+    if not args:
         print(__doc__)
         sys.exit(0)
-    convert(sys.argv[1])
+    convert(args[0], month=month_arg)

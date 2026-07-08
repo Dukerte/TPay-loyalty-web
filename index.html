@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>TPay Loyalty – Дэлгэр Зуны Бэлэгтэй Аян</title>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&family=Source+Sans+3:wght@400;500;600;700&display=swap');
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
@@ -23,10 +23,45 @@
     }
 
     body {
-      font-family: 'Inter', sans-serif;
+      font-family: 'Source Sans 3', sans-serif;
       background: var(--bg);
       color: var(--text);
       min-height: 100vh;
+    }
+
+    /* ── MONTSERRAT for all headings & display text ── */
+    h1, h2, h3, h4, h5, h6,
+    .nav-links a, .nav-dropdown a,
+    .c-card h3, .c-stat-big, .section-title,
+    .ticket-count, .prize-name, .c-action-title,
+    .info-body h4, .lookup-body h2,
+    .result-found h3, .result-not-found h3,
+    .c-participate-title, .c-date, .c-live-row strong {
+      font-family: 'Roboto', sans-serif;
+    }
+
+    /* ── Participation rules block (blue card) ── */
+    .c-participate {
+      display: flex; border-radius: 12px; overflow: hidden;
+      border: 1px solid #c8d4fc;
+    }
+    .c-participate-item {
+      flex: 1; display: flex; align-items: center; gap: 10px;
+      padding: 10px 12px; background: #f0f4ff;
+    }
+    .c-participate-sep { width: 1px; background: #c8d4fc; flex-shrink: 0; }
+    .c-participate-icon {
+      width: 32px; height: 32px; border-radius: 50%;
+      background: #1847f0; display: flex; align-items: center;
+      justify-content: center; flex-shrink: 0;
+    }
+    .c-participate-title {
+      font-size: 13px; font-weight: 800; color: #1847f0;
+      display: block; line-height: 1.2; margin-bottom: 2px;
+    }
+    .c-participate-sub {
+      font-family: 'Source Sans 3', sans-serif;
+      font-size: 11px; color: #6b7280; display: block; line-height: 1.3;
     }
 
     /* ══════════════════════════════
@@ -175,21 +210,24 @@
     ══════════════════════════════ */
     .campaigns {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 16px;
-      margin-top: -36px;
+      grid-template-columns: 1fr 1.18fr 1fr;
+      gap: 20px;
+      margin-top: -44px;
+      padding-top: 24px;
       position: relative;
       z-index: 10;
+      align-items: start;
     }
     .c-card {
       background: #fff;
       border-radius: 20px;
-      box-shadow: 0 4px 28px rgba(0,0,0,0.10);
-      transition: transform .2s, box-shadow .2s;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05), 0 8px 28px rgba(0,0,0,0.07);
+      transition: transform .22s ease, box-shadow .22s ease;
       display: flex; flex-direction: column;
       overflow: hidden;
     }
-    .c-card:hover { transform: translateY(-4px); box-shadow: 0 12px 40px rgba(0,0,0,0.14); }
+    .c-card:not(.is-active):hover { transform: translateY(-4px); box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
+    .c-card.is-active:hover { transform: translateY(-10px) scale(1.01); }
 
     /* colored header band */
     .c-head {
@@ -384,7 +422,7 @@
       outline: none;
       color: var(--text);
       background: #f7f9ff;
-      font-family: 'Inter', sans-serif;
+      font-family: 'Source Sans 3', sans-serif;
       transition: border .2s, background .2s;
       min-width: 0;
     }
@@ -402,7 +440,7 @@
       cursor: pointer;
       white-space: nowrap;
       flex-shrink: 0;
-      font-family: 'Inter', sans-serif;
+      font-family: 'Roboto', sans-serif;
       transition: opacity .15s, transform .1s;
     }
     .btn-check:hover  { opacity: 0.88; }
@@ -585,6 +623,67 @@
     .info-arrow { color: var(--muted); flex-shrink: 0; }
 
     /* ══════════════════════════════
+       WINNERS SECTION
+    ══════════════════════════════ */
+    .winners-section {
+      margin-top: 32px;
+      background: linear-gradient(135deg, #fffbeb 0%, #fef9ec 100%);
+      border: 1.5px solid #fde68a;
+      border-radius: 20px;
+      padding: 28px 28px 24px;
+      overflow: hidden;
+      position: relative;
+    }
+    .winners-section::before {
+      content: '🏆';
+      position: absolute; top: -18px; right: 24px;
+      font-size: 88px; opacity: 0.07; line-height: 1;
+      pointer-events: none; user-select: none;
+    }
+    .winners-header { display: flex; align-items: center; gap: 14px; margin-bottom: 6px; }
+    .winners-title  { font-size: 18px; font-weight: 800; color: #78350f; font-family: 'Roboto', sans-serif; }
+    .winners-desc   { font-size: 13px; color: #92400e; margin-top: 2px; }
+    .winners-desc strong { color: #78350f; }
+
+    .winner-group { margin-top: 20px; }
+    .winner-group-label {
+      font-size: 11px; font-weight: 700; letter-spacing: 0.8px;
+      text-transform: uppercase; color: #a16207;
+      display: flex; align-items: center; gap: 8px;
+      margin-bottom: 10px;
+    }
+    .winner-group-label::after { content: ''; flex: 1; height: 1px; background: #fde68a; }
+
+    .winner-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 8px;
+    }
+    .winner-card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 10px 12px 9px;
+      border: 1px solid #fde68a;
+      position: relative;
+    }
+    .winner-rank  { font-size: 10px; font-weight: 700; color: #d97706; margin-bottom: 3px; }
+    .winner-name  { font-size: 12px; font-weight: 700; color: #1a1a2e; line-height: 1.3; margin-bottom: 2px; font-family: 'Roboto', sans-serif; }
+    .winner-phone { font-size: 11px; color: #9ca3af; font-family: 'Roboto', sans-serif; letter-spacing: 0.5px; }
+    .winner-dot {
+      position: absolute; top: 9px; right: 10px;
+      width: 7px; height: 7px; border-radius: 50%;
+    }
+    .wd-orange { background: #f97316; }
+    .wd-purple { background: #7c3aed; }
+    .wd-blue   { background: #2563eb; }
+    .wd-green  { background: #16a34a; }
+
+    @media (max-width: 700px) {
+      .winners-section { padding: 20px 16px; }
+      .winner-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    /* ══════════════════════════════
        FOOTER
     ══════════════════════════════ */
     footer {
@@ -612,19 +711,134 @@
     @keyframes spin { to { transform: rotate(360deg); } }
 
     /* ══════════════════════════════
-       RESPONSIVE
+       CARD STATES
     ══════════════════════════════ */
+
+    /* Active: pulsing ring + shimmer header */
+    @keyframes pulse-glow {
+      0%, 100% {
+        box-shadow: 0 0 0 2px #2b5cf5,
+                    0 20px 60px rgba(24,71,240,0.16),
+                    0 4px 16px rgba(0,0,0,0.07);
+      }
+      50% {
+        box-shadow: 0 0 0 3px #4d79ff,
+                    0 28px 72px rgba(24,71,240,0.32),
+                    0 4px 16px rgba(0,0,0,0.08);
+      }
+    }
+    @keyframes shimmer {
+      0%        { left: -75%; }
+      50%, 100% { left: 125%; }
+    }
+
+    .c-card.is-active {
+      transform: translateY(-8px) scale(1.01);
+      animation: pulse-glow 2.8s ease-in-out infinite;
+      z-index: 5;
+    }
+    .c-card.is-active .c-head {
+      background: linear-gradient(135deg, #2056f5 0%, #0c30d9 100%);
+      position: relative; overflow: hidden;
+    }
+    .c-card.is-active .c-head::after {
+      content: '';
+      position: absolute; top: -50%; left: -75%;
+      width: 50%; height: 200%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.13), transparent);
+      transform: skewX(-20deg);
+      animation: shimmer 3.5s ease-in-out infinite;
+      pointer-events: none;
+    }
+
+    /* Status badge inverted to LIVE-style on active card */
+    .c-card.is-active .c-status {
+      background: rgba(255,255,255,0.15);
+      color: #fff;
+      border: 1px solid rgba(255,255,255,0.28);
+    }
+    .c-card.is-active .c-status-dot { background: #7dffb0; }
+
+    /* Done/upcoming: slightly subdued, no filter */
+    .c-card.is-done   { opacity: 0.9; }
+    .c-card.is-upcoming { opacity: 0.9; }
+    .c-card.is-done:hover, .c-card.is-upcoming:hover { opacity: 1; }
+
+    /* Month label */
+    .c-month-num {
+      font-size: 10px; font-weight: 500; letter-spacing: 1px;
+      color: rgba(255,255,255,0.5); text-transform: uppercase;
+      display: block; margin-bottom: 4px;
+    }
+
+    /* ══════════════════════════════
+       RESPONSIVE
+
+    /* ══════════════════════════════
+       CARD MONTHLY VIEWS
+    ══════════════════════════════ */
+    .c-stat-block { text-align: center; padding: 6px 0 2px; }
+    .c-stat-big { font-size: 46px; font-weight: 900; line-height: 1; letter-spacing: -1px; }
+    .c-card.green  .c-stat-big { color: #0a7a10; }
+    .c-card.blue   .c-stat-big { color: #0a2fd4; }
+    .c-card.orange .c-stat-big { color: #c02800; }
+    .c-stat-desc { font-size: 13px; font-weight: 600; color: var(--muted); margin-top: 3px; }
+
+    .c-btns { display: flex; flex-direction: column; gap: 8px; }
+    .c-cta {
+      display: flex; align-items: center; justify-content: center; gap: 7px;
+      padding: 11px 16px; border-radius: 12px;
+      font-size: 13px; font-weight: 700; text-decoration: none;
+      border: 2px solid transparent; font-family: 'Roboto', sans-serif;
+      transition: opacity .15s, transform .1s;
+    }
+    .c-cta:hover  { opacity: 0.88; transform: translateY(-1px); }
+    .c-cta:active { transform: scale(0.97); }
+    .c-card.green  .c-cta-solid   { background: linear-gradient(135deg, #17b81a, #0d9e10); color: #fff; box-shadow: 0 4px 14px rgba(23,184,26,0.25); }
+    .c-card.green  .c-cta-outline { border-color: #b8e8ba; color: #0a7a10; background: transparent; }
+    .c-card.green  .c-cta-outline:hover { background: #f0fff4; }
+    .c-card.blue   .c-cta-solid   { background: linear-gradient(135deg, #1847f0, #0932cc); color: #fff; box-shadow: 0 4px 14px rgba(24,71,240,0.25); }
+
+    .c-live-stats {
+      background: #f0f4ff; border-radius: 12px;
+      padding: 12px 14px; border: 1px solid #c8d4fc;
+      display: flex; flex-direction: column; gap: 6px;
+    }
+    .c-live-row {
+      font-size: 13px; color: #444;
+      display: flex; align-items: center; gap: 7px; line-height: 1.4;
+    }
+    .c-live-row strong { color: #0a2fd4; font-weight: 900; }
+
     @media (max-width: 900px) {
       .prizes-strip { grid-template-columns: repeat(3, 1fr); }
     }
     /* Content layout collapses on narrow phones */
     @media (max-width: 700px) {
-      .campaigns { grid-template-columns: 1fr; margin-top: -16px; }
+      /* Hero */
+      .hero { min-height: 220px; }
+      .hero-inner { padding: 28px 20px 52px; }
+      .hero-text { width: 100%; align-items: center; }
+      .hero-title-img  { width: min(280px, 85vw); margin-bottom: 8px; }
+      .hero-subtitle-img { width: min(240px, 75vw); }
+
+      /* Campaign cards */
+      .campaigns {
+        grid-template-columns: 1fr;
+        margin-top: -36px;
+        padding-top: 0;
+        gap: 12px;
+      }
+      .c-card.is-active { transform: none; animation: pulse-glow 2.8s ease-in-out infinite; }
+
+      /* Lookup */
       .lookup-card { flex-direction: column; padding: 24px 20px; gap: 20px; text-align: center; }
       .lookup-gift { display: none; }
       .lookup-row  { flex-wrap: wrap; }
       .btn-check   { width: 100%; }
-      .info-grid   { grid-template-columns: 1fr; }
+
+      /* Misc */
+      .info-grid    { grid-template-columns: 1fr; }
       .prizes-strip { grid-template-columns: repeat(2, 1fr); }
     }
   </style>
@@ -707,28 +921,30 @@ function closeNav() {
   <div class="campaigns" id="campaigns">
 
     <!-- GREEN: Шинэ зээлийн аян -->
-    <div class="c-card green">
+    <div class="c-card green is-done">
       <div class="c-head">
         <div class="c-head-text">
-          <h3>Шинэ зээлийн аян</h3>
+<h3>Шинэ зээлийн аян</h3>
           <div class="c-status">
-            <div class="c-status-dot"></div>
-            Сугалааны тохирол явагдаж байна
+            ✓ Дууссан
           </div>
         </div>
         <div class="c-head-icon"><img src="new loan.svg" alt=""></div>
       </div>
       <div class="c-body">
-        <div class="c-actions">
-          <div class="c-action">
-            <div class="c-action-icon">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg>
-            </div>
-            <div class="c-action-text">
-              <span class="c-action-title">Шинэ зээл авах</span>
-              <span class="c-action-sub">бүр 1 ширхэг сугалааны эрхтэй</span>
-            </div>
-          </div>
+        <div class="c-stat-block">
+          <div class="c-stat-big">770</div>
+          <div class="c-stat-desc">оролцогч оролцсон</div>
+        </div>
+        <div class="c-btns">
+          <a class="c-cta c-cta-solid" href="draw.html">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+            Сугалааны тохирлын үр дүн харах
+          </a>
+          <a class="c-cta c-cta-outline" href="https://www.facebook.com/TpayMNG/videos/2500280360437453" target="_blank">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            LIVE бичлэг үзэх
+          </a>
         </div>
         <div class="c-date">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
@@ -738,38 +954,57 @@ function closeNav() {
     </div>
 
     <!-- BLUE: Эргэн төлөлтийн аян -->
-    <div class="c-card blue">
+    <div class="c-card blue is-active">
       <div class="c-head">
         <div class="c-head-text">
-          <h3>Эргэн төлөлтийн аян</h3>
+<h3>Эргэн төлөлтийн аян</h3>
           <div class="c-status">
             <div class="c-status-dot"></div>
-            07.06-наас эхлэн үргэлжилж байна
+            Одоо үргэлжилж буй
           </div>
         </div>
         <div class="c-head-icon"><img src="payment.svg" alt=""></div>
       </div>
       <div class="c-body">
-        <div class="c-actions">
-          <div class="c-action">
-            <div class="c-action-icon">
+        <div class="c-live-stats">
+          <div class="c-live-row">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="2" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+            <span id="card2Date">—</span>-ний байдлаар
+          </div>
+          <div class="c-live-row">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="2" stroke-linecap="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+            <strong id="card2Count">—</strong> харилцагч бүртгүүлсэн
+          </div>
+          <div class="c-live-row">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="2" stroke-linecap="round"><path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v2z"/></svg>
+            Нийт <strong id="card2Total">—</strong> сугалааны эрх
+          </div>
+        </div>
+        <div class="c-participate">
+          <div class="c-participate-item">
+            <div class="c-participate-icon">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
             </div>
-            <div class="c-action-text">
-              <span class="c-action-title">Зээл сунгах</span>
-              <span class="c-action-sub">бүр 1 ширхэг сугалааны эрхтэй</span>
+            <div>
+              <span class="c-participate-title">Зээл сунгах</span>
+              <span class="c-participate-sub">бүр 1 ширхэг сугалааны эрхтэй</span>
             </div>
           </div>
-          <div class="c-action">
-            <div class="c-action-icon">
+          <div class="c-participate-sep"></div>
+          <div class="c-participate-item">
+            <div class="c-participate-icon">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round"><path d="M5 12a7 7 0 1 0 7-7"/><path d="M5 8v4h4"/></svg>
             </div>
-            <div class="c-action-text">
-              <span class="c-action-title">Зээл хаах</span>
-              <span class="c-action-sub">бүр 2 ширхэг сугалааны эрхтэй</span>
+            <div>
+              <span class="c-participate-title">Зээл хаах</span>
+              <span class="c-participate-sub">бүр 2 ширхэг сугалааны эрхтэй</span>
             </div>
           </div>
         </div>
+        <a class="c-cta c-cta-solid" href="#lookup">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          Сугалааны эрх шалгах
+        </a>
         <div class="c-date">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
           07.06 – 07.31
@@ -778,12 +1013,12 @@ function closeNav() {
     </div>
 
     <!-- ORANGE: Давтан зээлийн аян -->
-    <div class="c-card orange">
+    <div class="c-card orange is-upcoming">
       <div class="c-head">
         <div class="c-head-text">
-          <h3>Давтан зээлийн аян</h3>
+<h3>Давтан зээлийн аян</h3>
           <div class="c-status">
-            ⏳ <span id="daysLabel">Удахгүй эхлэх гэж байна</span>
+            ⏳ <span id="daysUntil3">—</span> өдрийн дараа эхлэнэ
           </div>
         </div>
         <div class="c-head-icon"><img src="repeat loans.svg" alt=""></div>
@@ -810,17 +1045,15 @@ function closeNav() {
   </div><!-- /campaigns -->
 
   <script>
-    // Dynamic countdown for Aug 1
-    (function() {
-      const target = new Date('2026-08-01');
-      const today  = new Date(); today.setHours(0,0,0,0);
-      const days   = Math.round((target - today) / 86400000);
-      const el     = document.getElementById('daysLabel');
-      if (!el) return;
-      if (days > 0)      el.textContent = days + ' хоногийн дараа эхлэх гэж байна';
-      else if (days === 0) el.textContent = 'Өнөөдөр эхэлж байна!';
-      else                el.textContent = 'Аян үргэлжилж байна';
-    })();
+  (function() {
+    const target = new Date('2026-08-01');
+    const today  = new Date(); today.setHours(0,0,0,0);
+    const days   = Math.round((target - today) / 86400000);
+    const el     = document.getElementById('daysUntil3');
+    if (!el) return;
+    if (days > 0) el.textContent = days;
+    else el.closest('.c-status').innerHTML = '<div class="c-status-dot"></div> Үргэлжилж байна';
+  })();
   </script>
 
   <!-- Live Stats Banner -->
@@ -853,7 +1086,7 @@ function closeNav() {
       </div>
       <div class="lookup-body">
         <h2>Сугалааны эрх шалгах</h2>
-        <p>Бүртгэлтэй утасны дугаараа оруулна уу</p>
+        <p>Эргэн төлөлтийн аян (07.06–07.31) — бүртгэлтэй утасны дугаараа оруулна уу</p>
         <div class="lookup-row">
           <div class="phone-prefix-box">
             🇲🇳 +976
@@ -881,62 +1114,41 @@ function closeNav() {
   <!-- Prizes -->
   <section class="prizes-section">
     <div class="section-header">
-      <div class="section-title">🎁 6-р сарын шагналын сан</div>
+      <div class="section-title">🎁 7-р сарын шагналын сан</div>
       <a href="#" class="see-all">Бүх шагналыг үзэх →</a>
     </div>
     <div class="prizes-strip">
 
-      <!-- Camping — with tooltip -->
-      <div class="prize-card has-tooltip" id="campingCard">
+      <!-- 55" TV -->
+      <div class="prize-card">
         <div class="prize-svg-icon">
-          <!-- Tent icon -->
           <svg width="44" height="44" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <rect width="44" height="44" rx="12" fill="#FFF3E0"/>
-            <path d="M8 34L22 12L36 34H8Z" fill="#FF8C00" opacity=".2"/>
-            <path d="M8 34L22 12L36 34" stroke="#E65100" stroke-width="2" stroke-linejoin="round"/>
-            <path d="M14 34L22 20L30 34" stroke="#FF8C00" stroke-width="2" stroke-linejoin="round"/>
-            <line x1="8" y1="34" x2="36" y2="34" stroke="#E65100" stroke-width="2" stroke-linecap="round"/>
-            <line x1="22" y1="12" x2="22" y2="9" stroke="#E65100" stroke-width="1.5" stroke-linecap="round"/>
+            <rect width="44" height="44" rx="12" fill="#E3F2FD"/>
+            <rect x="7" y="10" width="30" height="19" rx="2" fill="#1565C0" opacity=".12" stroke="#1565C0" stroke-width="1.5"/>
+            <rect x="10" y="13" width="24" height="13" rx="1" fill="#1565C0" opacity=".18"/>
+            <path d="M10 22l5-4 5 3.5 4-5.5 6 6" stroke="#1565C0" stroke-width="1.2" opacity=".5" stroke-linecap="round" stroke-linejoin="round"/>
+            <line x1="22" y1="29" x2="22" y2="34" stroke="#1565C0" stroke-width="2" stroke-linecap="round"/>
+            <line x1="15" y1="34" x2="29" y2="34" stroke="#1565C0" stroke-width="2" stroke-linecap="round"/>
           </svg>
         </div>
-        <div class="prize-name">Аяны багц</div>
+        <div class="prize-name">55 инч зурагт</div>
         <span class="prize-qty">1ш</span>
-        <span class="hint-badge">дэлгэрэнгүй ▾</span>
-        <div class="prize-tooltip">
-          <h5>Аяллын багц дотроо:</h5>
-          <ul>
-            <li><span class="ti">⛺</span> 4–5 хүний давхар дээвэртэй майхан /260×260×150см/</li>
-            <li><span class="ti">🪑</span> Төмөр ширээ, сандлын ком</li>
-            <li><span class="ti">🛌</span> 2 хүний мишок</li>
-            <li><span class="ti">🍽️</span> Аяга тавагны ком /4 хүн/</li>
-            <li><span class="ti">🏕️</span> Чийгний дэвсгэр /2×2м/</li>
-            <li><span class="ti">🔥</span> Шорлог шарагч</li>
-            <li><span class="ti">🎒</span> Аяны том цүнх /150л/</li>
-            <li><span class="ti">🌿</span> Дүүжин ор</li>
-          </ul>
-        </div>
       </div>
 
-      <!-- Chair/table set -->
+      <!-- Хөлдөөгч -->
       <div class="prize-card">
         <div class="prize-svg-icon">
           <svg width="44" height="44" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
             <rect width="44" height="44" rx="12" fill="#E8F5E9"/>
-            <!-- Table top -->
-            <rect x="10" y="18" width="24" height="4" rx="2" fill="#2E7D32" opacity=".8"/>
-            <!-- Table legs -->
-            <line x1="14" y1="22" x2="12" y2="34" stroke="#2E7D32" stroke-width="2" stroke-linecap="round"/>
-            <line x1="30" y1="22" x2="32" y2="34" stroke="#2E7D32" stroke-width="2" stroke-linecap="round"/>
-            <!-- Chair seat -->
-            <rect x="26" y="26" width="10" height="3" rx="1.5" fill="#388E3C" opacity=".7"/>
-            <!-- Chair back -->
-            <line x1="34" y1="22" x2="34" y2="29" stroke="#388E3C" stroke-width="2" stroke-linecap="round"/>
-            <!-- Chair leg -->
-            <line x1="27" y1="29" x2="27" y2="35" stroke="#388E3C" stroke-width="1.5" stroke-linecap="round"/>
-            <line x1="35" y1="29" x2="35" y2="35" stroke="#388E3C" stroke-width="1.5" stroke-linecap="round"/>
+            <rect x="13" y="7" width="18" height="30" rx="3" fill="#2E7D32" opacity=".12" stroke="#2E7D32" stroke-width="1.5"/>
+            <line x1="13" y1="20" x2="31" y2="20" stroke="#2E7D32" stroke-width="1.5"/>
+            <line x1="19" y1="14" x2="24" y2="14" stroke="#2E7D32" stroke-width="2" stroke-linecap="round"/>
+            <line x1="19" y1="26" x2="24" y2="26" stroke="#2E7D32" stroke-width="2" stroke-linecap="round"/>
+            <circle cx="26" cy="14" r="1.2" fill="#2E7D32" opacity=".5"/>
+            <circle cx="26" cy="26" r="1.2" fill="#2E7D32" opacity=".5"/>
           </svg>
         </div>
-        <div class="prize-name">Аяны ширээ сандал, аяга тавагны ком</div>
+        <div class="prize-name">Хөлдөөгч</div>
         <span class="prize-qty">1ш</span>
       </div>
 
@@ -980,6 +1192,77 @@ function closeNav() {
         <span class="prize-qty">10ш</span>
       </div>
 
+    </div>
+  </section>
+
+  <!-- Month 1 Winners -->
+  <section class="winners-section" id="winners">
+    <div class="winners-header">
+      <span style="font-size:32px;line-height:1;">🎁</span>
+      <div>
+        <div class="winners-title">Шинэ зээлийн аяны азтан харилцагчид</div>
+        <div class="winners-desc">6-р сарын шагналын эзэд · Нийт <strong>770</strong> оролцогчоос <strong>32</strong> харилцагч шалгарлаа</div>
+      </div>
+    </div>
+
+    <!-- Group 1: WOOW -->
+    <div class="winner-group">
+      <div class="winner-group-label">🟠 50,000₮ WOOW худалдан авалтын эрх — 10 ялагч</div>
+      <div class="winner-grid">
+        <div class="winner-card"><div class="winner-dot wd-orange"></div><div class="winner-rank">#1</div><div class="winner-name">Б.НЭРГҮЙ</div><div class="winner-phone">8826 61**</div></div>
+        <div class="winner-card"><div class="winner-dot wd-orange"></div><div class="winner-rank">#2</div><div class="winner-name">Г.ШИНЭЖАРГАЛ</div><div class="winner-phone">9591 76**</div></div>
+        <div class="winner-card"><div class="winner-dot wd-orange"></div><div class="winner-rank">#3</div><div class="winner-name">Г.ШИНЭГЭРЭЛ</div><div class="winner-phone">8685 70**</div></div>
+        <div class="winner-card"><div class="winner-dot wd-orange"></div><div class="winner-rank">#4</div><div class="winner-name">Л.ОДХУУ</div><div class="winner-phone">9557 71**</div></div>
+        <div class="winner-card"><div class="winner-dot wd-orange"></div><div class="winner-rank">#5</div><div class="winner-name">Н.ЭНХЖАРГАЛ</div><div class="winner-phone">8612 10**</div></div>
+        <div class="winner-card"><div class="winner-dot wd-orange"></div><div class="winner-rank">#6</div><div class="winner-name">Б.ЭНХМЭНД</div><div class="winner-phone">8063 14**</div></div>
+        <div class="winner-card"><div class="winner-dot wd-orange"></div><div class="winner-rank">#7</div><div class="winner-name">О.ГАНТУЛГА</div><div class="winner-phone">9034 36**</div></div>
+        <div class="winner-card"><div class="winner-dot wd-orange"></div><div class="winner-rank">#8</div><div class="winner-name">Г.ЦОГБАДРАХ</div><div class="winner-phone">9952 81**</div></div>
+        <div class="winner-card"><div class="winner-dot wd-orange"></div><div class="winner-rank">#9</div><div class="winner-name">Б.ӨНӨБОЛД</div><div class="winner-phone">9119 76**</div></div>
+        <div class="winner-card"><div class="winner-dot wd-orange"></div><div class="winner-rank">#10</div><div class="winner-name">С.ЦЭРЭННОРОВ</div><div class="winner-phone">8019 67**</div></div>
+      </div>
+    </div>
+
+    <!-- Group 2: Зээлийн эрх нэмэх -->
+    <div class="winner-group">
+      <div class="winner-group-label">🟣 Зээлийн эрх нэмэх — 10 ялагч</div>
+      <div class="winner-grid">
+        <div class="winner-card"><div class="winner-dot wd-purple"></div><div class="winner-rank">#11</div><div class="winner-name">Э.ХҮРЭЛ-ОЧИР</div><div class="winner-phone">9426 10**</div></div>
+        <div class="winner-card"><div class="winner-dot wd-purple"></div><div class="winner-rank">#12</div><div class="winner-name">С.ОТГОНБАЯР</div><div class="winner-phone">9456 57**</div></div>
+        <div class="winner-card"><div class="winner-dot wd-purple"></div><div class="winner-rank">#13</div><div class="winner-name">Б.ДАВААЖАРГАЛ</div><div class="winner-phone">9957 49**</div></div>
+        <div class="winner-card"><div class="winner-dot wd-purple"></div><div class="winner-rank">#14</div><div class="winner-name">Б.ИЖИЛЦЭЦЭГ</div><div class="winner-phone">8012 63**</div></div>
+        <div class="winner-card"><div class="winner-dot wd-purple"></div><div class="winner-rank">#15</div><div class="winner-name">Б.ОРХОНТУЯА</div><div class="winner-phone">8511 70**</div></div>
+        <div class="winner-card"><div class="winner-dot wd-purple"></div><div class="winner-rank">#16</div><div class="winner-name">И.ДАШДОРЖ</div><div class="winner-phone">8955 54**</div></div>
+        <div class="winner-card"><div class="winner-dot wd-purple"></div><div class="winner-rank">#17</div><div class="winner-name">О.МӨНХЗУЛ</div><div class="winner-phone">8040 31**</div></div>
+        <div class="winner-card"><div class="winner-dot wd-purple"></div><div class="winner-rank">#18</div><div class="winner-name">Н.ГАН-ЭРДЭНЭ</div><div class="winner-phone">9935 25**</div></div>
+        <div class="winner-card"><div class="winner-dot wd-purple"></div><div class="winner-rank">#19</div><div class="winner-name">А.АЛТАНГЭРЭЛ</div><div class="winner-phone">9670 56**</div></div>
+        <div class="winner-card"><div class="winner-dot wd-purple"></div><div class="winner-rank">#20</div><div class="winner-name">Э.НАНДИНЦЭЦЭГ</div><div class="winner-phone">9087 86**</div></div>
+      </div>
+    </div>
+
+    <!-- Group 3: Зээл хаах эрх -->
+    <div class="winner-group">
+      <div class="winner-group-label">🔵 Зээл хаах эрх — 10 ялагч</div>
+      <div class="winner-grid">
+        <div class="winner-card"><div class="winner-dot wd-blue"></div><div class="winner-rank">#21</div><div class="winner-name">Б.ДЭЛГЭРМАА</div><div class="winner-phone">8096 42**</div></div>
+        <div class="winner-card"><div class="winner-dot wd-blue"></div><div class="winner-rank">#22</div><div class="winner-name">Д.УРТНАСАН</div><div class="winner-phone">8918 30**</div></div>
+        <div class="winner-card"><div class="winner-dot wd-blue"></div><div class="winner-rank">#23</div><div class="winner-name">А.МӨНХБИЛЭГ</div><div class="winner-phone">9444 41**</div></div>
+        <div class="winner-card"><div class="winner-dot wd-blue"></div><div class="winner-rank">#24</div><div class="winner-name">М.ЭНХТУЯА</div><div class="winner-phone">9101 11**</div></div>
+        <div class="winner-card"><div class="winner-dot wd-blue"></div><div class="winner-rank">#25</div><div class="winner-name">А.ОЮУН-ЭРДЭНЭ</div><div class="winner-phone">9678 85**</div></div>
+        <div class="winner-card"><div class="winner-dot wd-blue"></div><div class="winner-rank">#26</div><div class="winner-name">Ч.НАСАНЖАРГАЛ</div><div class="winner-phone">9808 48**</div></div>
+        <div class="winner-card"><div class="winner-dot wd-blue"></div><div class="winner-rank">#27</div><div class="winner-name">Г.АРИУНБАЯР</div><div class="winner-phone">9586 38**</div></div>
+        <div class="winner-card"><div class="winner-dot wd-blue"></div><div class="winner-rank">#28</div><div class="winner-name">Ч.ЭРХЭМЦЭЦЭГ</div><div class="winner-phone">8860 34**</div></div>
+        <div class="winner-card"><div class="winner-dot wd-blue"></div><div class="winner-rank">#29</div><div class="winner-name">Г.БАТБАЯР</div><div class="winner-phone">8979 24**</div></div>
+        <div class="winner-card"><div class="winner-dot wd-blue"></div><div class="winner-rank">#30</div><div class="winner-name">Ц.ХОНГОРЗУЛ</div><div class="winner-phone">8957 18**</div></div>
+      </div>
+    </div>
+
+    <!-- Group 4: Тусгай шагнал -->
+    <div class="winner-group">
+      <div class="winner-group-label">🟢 Тусгай шагнал — 2 ялагч</div>
+      <div class="winner-grid" style="grid-template-columns: repeat(2,1fr);">
+        <div class="winner-card"><div class="winner-dot wd-green"></div><div class="winner-rank">#31 · Аяны ширээ сандал</div><div class="winner-name">Г.ЛУВСАНЖАМЦ</div><div class="winner-phone">8544 70**</div></div>
+        <div class="winner-card"><div class="winner-dot wd-green"></div><div class="winner-rank">#32 · Аяны багц</div><div class="winner-name">Ж.БААСАНЖАВ</div><div class="winner-phone">9963 65**</div></div>
+      </div>
     </div>
   </section>
 
@@ -1053,16 +1336,6 @@ function closeNav() {
 </footer>
 
 <script>
-  // Mobile tooltip toggle
-  const campingCard = document.getElementById('campingCard');
-  campingCard.addEventListener('click', e => {
-    if (window.matchMedia('(hover: none)').matches) {
-      campingCard.classList.toggle('active');
-      e.stopPropagation();
-    }
-  });
-  document.addEventListener('click', () => campingCard.classList.remove('active'));
-
   // Smooth scroll for nav links
   document.querySelectorAll('a[href^="#"]').forEach(a => {
     a.addEventListener('click', e => {
@@ -1080,30 +1353,39 @@ function closeNav() {
     const count   = entries.filter(([,v]) => v > 0).length;
     const total   = entries.reduce((s,[,v]) => s + (v > 0 ? v : 0), 0);
     const updated = data._updated || '';
+    const dateStr = updated ? updated.replace(/-/g, '.') : '—';
 
+    // Stats banner (hidden by default, kept for reference)
     document.getElementById('statsCount').textContent = count.toLocaleString();
     document.getElementById('statsTotal').textContent = total.toLocaleString();
+    if (updated) document.getElementById('statsDate').textContent = dateStr;
 
-    // Format date nicely: 2026-06-22 → 2026.06.22
-    if (updated) {
-      document.getElementById('statsDate').textContent = updated.replace(/-/g, '.');
-    }
-
-    if (count > 0) {
-      document.getElementById('statsBanner').style.display = 'block';
-    }
+    // Blue card live stats
+    document.getElementById('card2Date').textContent  = dateStr;
+    document.getElementById('card2Count').textContent = count.toLocaleString();
+    document.getElementById('card2Total').textContent = total.toLocaleString();
   }
 
+  // Month 1 data (Шинэ зээлийн аян) — used for lookup is DISABLED; card shows hardcoded 770
+  // Month 2 data (Эргэн төлөлтийн аян) — loaded from data2.json
+  let month2Data = {};
+
   async function loadData() {
+    // Load Month 2 data for blue card stats + lookup
     try {
-      const r = await fetch('data.json?t=' + Date.now());
+      const r = await fetch('data2.json?t=' + Date.now());
       if (!r.ok) throw new Error();
-      const fresh = await r.json();
-      raffleData = fresh;
+      month2Data = await r.json();
     } catch {
-      // keep inline fallback
+      month2Data = {};
     }
-    updateStats(raffleData);
+    updateStats(month2Data);
+
+    // Also keep month1 in raffleData for reference (not used in lookup)
+    try {
+      const r1 = await fetch('data.json?t=' + Date.now());
+      if (r1.ok) raffleData = await r1.json();
+    } catch { /* keep inline fallback */ }
   }
   loadData();
 
@@ -1136,7 +1418,7 @@ function closeNav() {
     btn.innerHTML = 'Шалгах';
     resultEl.style.display = 'block';
 
-    const entry = raffleData[phone];
+    const entry = month2Data[phone];
     if (entry !== undefined && entry !== null && entry !== 0 && entry !== '') {
       const tickets = parseInt(entry) || entry;
       resultEl.innerHTML = `
@@ -1154,9 +1436,8 @@ function closeNav() {
           <h3>Сугалааны эрх олдсонгүй</h3>
           <p style="font-size:13px;color:#7a4020;margin-bottom:10px;"><strong>${fmt(phone)}</strong> дугаарт одоогоор сугалааны эрх бүртгэгдээгүй байна.</p>
           <div class="campaign-dates">
-            <div class="date-row"><span>🟢</span><span><strong>06.20–07.05</strong> — шинэ зээл авснаар эрх дагалдана.</span></div>
-            <div class="date-row"><span>🔵</span><span><strong>07.06–07.31</strong> — зээлийн эргэн төлөлт бүрт эрх дагалдана.</span></div>
-            <div class="date-row"><span>🟠</span><span><strong>08.01–08.21</strong> — давтан зээл авснаар эрх дагалдана.</span></div>
+            <div class="date-row"><span>🔵</span><span><strong>07.06–07.31</strong> — Зээл эргэн төлөх эсвэл зээл хаах бүрт сугалааны эрх дагалдана.</span></div>
+            <div class="date-row"><span>🟠</span><span><strong>08.01–08.21</strong> — Давтан зээлийн аян удахгүй эхэлнэ.</span></div>
           </div>
         </div>`;
     }

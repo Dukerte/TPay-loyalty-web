@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>TPay – Сугалааны Тохирол</title>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&family=Source+Sans+3:wght@400;500;600;700&display=swap');
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
@@ -17,7 +17,7 @@
     }
 
     body {
-      font-family: 'Inter', sans-serif;
+      font-family: 'Source Sans 3', sans-serif;
       background: linear-gradient(160deg, #05103a 0%, #0a1f6e 50%, #0d2d8a 100%);
       min-height: 100vh;
       color: #fff;
@@ -280,9 +280,18 @@
     /* ── LOG ───────────────────────────────── */
     .log-section { width:100%; }
     .log-hdr {
-      display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;
+      display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:10px;
     }
-    .log-hdr h3 { font-size:15px; font-weight:700; }
+    .log-hdr h3 { font-size:15px; font-weight:700; flex:1; }
+    .log-actions { display:flex; align-items:center; gap:6px; }
+    .tool-btn {
+      font-size:15px; background:rgba(255,255,255,0.07);
+      border:1px solid rgba(255,255,255,0.15); border-radius:8px;
+      width:32px; height:32px; cursor:pointer; transition:all .15s;
+      display:flex; align-items:center; justify-content:center;
+    }
+    .tool-btn:hover { background:rgba(255,255,255,0.15); }
+    .tool-btn.locked { border-color:var(--orange); color:var(--orange); }
     .clear-btn {
       font-size:12px; font-weight:600; color:rgba(255,255,255,0.4);
       background:none; border:1px solid rgba(255,255,255,0.15);
@@ -512,7 +521,7 @@
     .gate-btn {
       width: 100%; height: 54px; border: none; border-radius: 14px;
       font-size: 15px; font-weight: 800; cursor: pointer;
-      font-family: 'Inter', sans-serif;
+      font-family: 'Source Sans 3', sans-serif;
       display: flex; align-items: center; justify-content: center; gap: 10px;
       transition: transform .15s, box-shadow .15s;
     }
@@ -540,7 +549,7 @@
       width: 100%; height: 50px; border-radius: 12px;
       background: rgba(255,255,255,0.08); border: 1.5px solid rgba(255,255,255,0.18);
       color: #fff; font-size: 20px; font-weight: 700; letter-spacing: 6px;
-      text-align: center; outline: none; font-family: 'Inter', sans-serif;
+      text-align: center; outline: none; font-family: 'Source Sans 3', sans-serif;
       transition: border-color .2s;
     }
     .pin-input:focus { border-color: rgba(24,71,240,0.7); }
@@ -552,12 +561,12 @@
       width: 100%; height: 48px; border: none; border-radius: 12px;
       background: linear-gradient(135deg, #1847f0, #0932cc);
       color: #fff; font-size: 14px; font-weight: 800; cursor: pointer;
-      font-family: 'Inter', sans-serif;
+      font-family: 'Source Sans 3', sans-serif;
     }
     .pin-back {
       background: none; border: none; color: rgba(255,255,255,0.4);
       font-size: 12px; font-weight: 600; cursor: pointer;
-      font-family: 'Inter', sans-serif; text-align: center;
+      font-family: 'Source Sans 3', sans-serif; text-align: center;
     }
     .pin-back:hover { color: rgba(255,255,255,0.7); }
 
@@ -866,7 +875,12 @@
     <div class="log-hdr">
       <h3>🏅 Ялагчдын жагсаалт</h3>
       <span class="viewer-badge">👁 Харах горим</span>
-      <button class="clear-btn admin-only" onclick="clearAll()">Цэвэрлэх</button>
+      <div class="log-actions admin-only">
+        <button class="tool-btn" onclick="exportWinners()" title="JSON нөөцлөх (backup)">💾</button>
+        <button class="tool-btn" onclick="importWinners()" title="JSON-оос сэргээх">📥</button>
+        <button class="tool-btn" id="lockBtn" onclick="toggleLock()" title="Сугалааг түгжих">🔒</button>
+        <button class="clear-btn" onclick="clearAll()">Цэвэрлэх</button>
+      </div>
     </div>
     <div class="log-list" id="logList">
       <div class="empty-state" id="emptyState">Одоогоор ялагч татагдаагүй байна.</div>
@@ -1066,10 +1080,16 @@ function restoreState() {
       winners = s.winners;
       document.getElementById('emptyState')?.remove();
       // render in order (oldest first so newest ends up on top)
+      // _display / _person support recovered entries from restore_month1.html
       winners.forEach((w, i) => {
-        addLog(maskPhone(w.phone), nameInitial(w), w.kiosk, w.date, w.prize, i + 1, w.nonce);
+        const ph  = w._display || maskPhone(w.phone);
+        const per = w._person  || nameInitial(w);
+        addLog(ph, per, w.kiosk, w.date, w.prize, i + 1, w.nonce);
       });
     }
+
+    // apply lock if set
+    if (s.locked) applyLock();
   } catch (e) { /* ignore corrupt state */ }
 }
 
@@ -1337,6 +1357,66 @@ function animateConfetti() {
   else if (days === 0) el.textContent = 'Өнөөдөр эхэлж байна!';
   else                el.textContent = 'Аян үргэлжилж байна';
 })();
+
+// ── LOCK SESSION ──────────────────────────────────────────
+function applyLock() {
+  const btn = document.getElementById('drawBtn');
+  if (btn) { btn.disabled = true; btn.title = 'Түгжигдсэн'; }
+  const lb = document.getElementById('lockBtn');
+  if (lb) { lb.innerHTML = '🔓'; lb.title = 'Түгжигдсэн — Задлахын тулд дарна уу'; lb.classList.add('locked'); }
+}
+
+function toggleLock() {
+  const raw = localStorage.getItem(STORAGE_KEY);
+  const s = raw ? JSON.parse(raw) : {};
+  if (s.locked) {
+    // unlock
+    if (!confirm('Сугалааг дахин нээх үү? Шинэ тасалбар татагдах болно.')) return;
+    s.locked = false;
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(s));
+    location.reload();
+  } else {
+    // lock
+    if (!confirm('Энэ сарын сугалааг дуусгаж түгжих үү?\nДахин нээхийн тулд 🔓 товчийг дарна уу.')) return;
+    s.locked = true;
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(s));
+    applyLock();
+  }
+}
+
+// ── EXPORT (backup) ────────────────────────────────────────
+function exportWinners() {
+  const data = localStorage.getItem(STORAGE_KEY);
+  if (!data || !JSON.parse(data).winners?.length) { alert('Ялагч байхгүй байна.'); return; }
+  const blob = new Blob([data], { type: 'application/json' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url;
+  const d = new Date();
+  a.download = 'tpay_winners_' + d.toISOString().slice(0,10) + '.json';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// ── IMPORT (restore from backup) ──────────────────────────
+function importWinners() {
+  if (!confirm('Одоогийн өгөгдлийг устгаж JSON файлаас сэргээх үү?')) return;
+  const inp = document.createElement('input');
+  inp.type = 'file'; inp.accept = '.json';
+  inp.onchange = function(e) {
+    const file = e.target.files[0]; if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      try {
+        JSON.parse(e.target.result); // validate
+        localStorage.setItem(STORAGE_KEY, e.target.result);
+        location.reload();
+      } catch { alert('JSON файл буруу байна.'); }
+    };
+    reader.readAsText(file);
+  };
+  inp.click();
+}
 
 initGate();
 loadData();

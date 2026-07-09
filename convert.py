@@ -71,8 +71,14 @@ def fmt_date(raw):
 
 
 def detect_format(headers):
-    """Return 'new' (5-col with names) or 'old' (2-col phone+tickets)"""
+    """
+    'tpay' — TPay системийн шууд экспорт: Төрөл | Регистр | Овог | Нэр | Утас
+    'new'  — гараар бэлдсэн 5 багана:     Нэр | Овог | Утас | Киоск | Огноо
+    'old'  — хуучин 2 багана:              Утас | Тикет тоо
+    """
     h = [str(x).strip().lower() if x else "" for x in headers]
+    if any("төрөл" in x for x in h):
+        return "tpay"
     if any("нэр" in x or "овог" in x for x in h):
         return "new"
     return "old"
@@ -101,7 +107,12 @@ def convert(excel_path: str, month: int = 1) -> None:
 
     headers = rows[0]
     fmt = detect_format(headers)
-    print(f"   Формат илэрлээ: {'5 багана (нэр/овог/утас)' if fmt == 'new' else '2 багана (утас/эрх)'}")
+    fmt_labels = {
+        'tpay': 'TPay экспорт (Төрөл|Регистр|Овог|Нэр|Утас) — Сунгалт=1эрх, Хаасан=2эрх',
+        'new':  '5 багана (Нэр|Овог|Утас|Киоск|Огноо)',
+        'old':  '2 багана (Утас|Тикет тоо)',
+    }
+    print(f"   Формат илэрлээ: {fmt_labels.get(fmt, fmt)}")
 
     # ── Build entries ──────────────────────────────────────
     entries = []   # for draw_data.json  — one entry per ticket row
@@ -112,12 +123,26 @@ def convert(excel_path: str, month: int = 1) -> None:
         if not any(row):
             continue  # skip fully empty rows
 
-        if fmt == "new":
+        if fmt == "tpay":
+            # Columns: Төрөл | Регистр | Овог | Нэр | Утасны дугаар
+            töröl   = str(row[0]).strip() if row[0] else ""
+            surname = str(row[2]).strip() if row[2] else ""
+            name    = str(row[3]).strip() if row[3] else ""
+            phone   = clean_phone(row[4])
+            if töröl == "Сунгалт":
+                tickets = 1
+            elif töröl in ("Хаасан", "Хаах", "Хаасан зээл"):
+                tickets = 2
+            else:
+                skipped += 1
+                continue
+        elif fmt == "new":
             name    = str(row[0]).strip() if row[0] else ""
             surname = str(row[1]).strip() if row[1] else ""
             phone   = clean_phone(row[2])
             kiosk   = str(row[3]).strip() if row[3] else ""
             loan_dt = fmt_date(row[4])
+            tickets = 1
         else:
             phone   = clean_phone(row[0])
             name    = ""
@@ -133,7 +158,17 @@ def convert(excel_path: str, month: int = 1) -> None:
             skipped += 1
             continue
 
-        if fmt == "new":
+        if fmt == "tpay":
+            for _ in range(tickets):
+                entries.append({
+                    "phone":   phone,
+                    "name":    name,
+                    "surname": surname,
+                    "kiosk":   "",
+                    "date":    ""
+                })
+            phone_counts[phone] = phone_counts.get(phone, 0) + tickets
+        elif fmt == "new":
             entries.append({
                 "phone":   phone,
                 "name":    name,

@@ -12,12 +12,25 @@ TPay Loyalty – Excel → data.json / data2.json + draw_data.json converter
   3-р сарын аян (Давтан зээлийн):
     python3 convert.py month3_data.xlsx --month 3
 
-Excel файлын формат (5 багана):
-  A: Харилцагч нэр      (жш: САРАНЦЭЦЭГ)
-  B: Харилцагч овог     (жш: Энхтөр)
-  C: Харилцагч утас     (жш: 96449901)
-  D: Киоск нэр          (жш: KIOSK 32)
-  E: Зээл авсан огноо   (жш: 2026-07-10)
+Excel файлын формат (олон хэлбэр автоматаар илэрнэ):
+
+  [1] Олон хуудас (Data.xlsx — Эргэн төлөлтийн аян)
+      Хуудас "Зээл сунгалт": 1-р мөр = толгой, 2-р мөрөөс өгөгдөл
+        Баганууд: (хоосон) | Регистр | Овог | Нэр | Огноо | Утас
+        1 сугалааны эрх
+      Хуудас "Хаасан зээл":  2-р мөр = толгой, 3-р мөрөөс өгөгдөл
+        Баганууд: (хоосон) | Регистр | Овог | Нэр | Огноо | Утас
+        2 сугалааны эрх
+
+  [2] TPay экспорт (1 хуудас, толгойн 1-р мөр нь "Төрөл" агуулна)
+        Төрөл | Регистр | Овог | Нэр | Утас
+        Сунгалт=1эрх, Хаасан/Хаах=2эрх
+
+  [3] 5 багана (гараар бэлдсэн)
+        Нэр | Овог | Утас | Киоск | Огноо  → 1эрх
+
+  [4] 2 багана (хуучин)
+        Утас | Тикет тоо
 
 Гаралт:
   --month 1 (default) → data.json  + draw_data.json
@@ -84,6 +97,99 @@ def detect_format(headers):
     return "old"
 
 
+def write_output(entries, phone_counts, skipped, month, base_dir):
+    """Write dataN.json and draw_dataN.json."""
+    suffix = "" if month == 1 else str(month)
+    total_tickets = len(entries)
+    unique_phones = len(phone_counts)
+    today = str(date.today())
+
+    data_json = {
+        "_updated": today,
+        "_note": f"convert.py --month {month} ашиглан үүсгэсэн.",
+    }
+    data_json.update(phone_counts)
+
+    data_json_path = os.path.join(base_dir, f"data{suffix}.json")
+    with open(data_json_path, "w", encoding="utf-8") as f:
+        json.dump(data_json, f, ensure_ascii=False, indent=2)
+
+    draw_json = {
+        "_updated": today,
+        "_total_tickets": total_tickets,
+        "_unique_phones": unique_phones,
+        "entries": entries
+    }
+    draw_json_path = os.path.join(base_dir, f"draw_data{suffix}.json")
+    with open(draw_json_path, "w", encoding="utf-8") as f:
+        json.dump(draw_json, f, ensure_ascii=False, indent=2)
+
+    print(f"✅  Амжилттай үүслээ")
+    print(f"   Нийт тасалбар:     {total_tickets}")
+    print(f"   Өвөрмөц харилцагч: {unique_phones}")
+    print(f"   Алгасав:           {skipped}")
+    print(f"   {data_json_path}")
+    print(f"   {draw_json_path}")
+    print()
+
+
+def process_multi_sheet(wb, month, base_dir):
+    """
+    Олон хуудас формат (Data.xlsx — Эргэн төлөлтийн аян):
+      'Зээл сунгалт' — 1 эрх, утас col[5], өгөгдөл 2-р мөрөөс
+      'Хаасан зээл'  — 2 эрх, утас col[5], өгөгдөл 3-р мөрөөс
+    """
+    print(f"   Формат илэрлээ: Олон хуудас (Зээл сунгалт + Хаасан зээл)")
+
+    entries = []
+    phone_counts = {}
+    skipped = 0
+
+    # ── Sheet 1: Зээл сунгалт — 1 ticket each ───────────────
+    ws1 = wb['Зээл сунгалт']
+    rows1 = list(ws1.iter_rows(values_only=True))
+    # Row 0: blank, Row 1: headers, Row 2+: data
+    sun_ok = sun_skip = 0
+    for row in rows1[2:]:
+        if not any(row):
+            continue
+        surname = str(row[2]).strip() if row[2] else ""
+        name    = str(row[3]).strip() if row[3] else ""
+        phone   = clean_phone(row[5])
+        if phone is None:
+            skipped += 1
+            sun_skip += 1
+            continue
+        entries.append({"phone": phone, "name": name, "surname": surname, "kiosk": "", "date": ""})
+        phone_counts[phone] = phone_counts.get(phone, 0) + 1
+        sun_ok += 1
+    print(f"   Зээл сунгалт: {sun_ok} мөр (1 эрх) · {sun_skip} алгасав")
+
+    # ── Sheet 2: Хаасан зээл — 2 tickets each ───────────────
+    ws2 = wb['Хаасан зээл']
+    rows2 = list(ws2.iter_rows(values_only=True))
+    # Row 0: blank, Row 1: blank, Row 2: headers, Row 3+: data
+    haa_ok = haa_skip = 0
+    for row in rows2[3:]:
+        if not any(row):
+            continue
+        surname = str(row[2]).strip() if row[2] else ""
+        name    = str(row[3]).strip() if row[3] else ""
+        phone   = clean_phone(row[5])
+        if phone is None:
+            skipped += 1
+            haa_skip += 1
+            continue
+        for _ in range(2):
+            entries.append({"phone": phone, "name": name, "surname": surname, "kiosk": "", "date": ""})
+        phone_counts[phone] = phone_counts.get(phone, 0) + 2
+        haa_ok += 1
+    print(f"   Хаасан зээл:  {haa_ok} мөр (2 эрх) · {haa_skip} алгасав")
+
+    wb.close()
+    write_output(entries, phone_counts, skipped, month, base_dir)
+
+
 def convert(excel_path: str, month: int = 1) -> None:
     suffix = "" if month == 1 else str(month)
     print(f"\n📋 {month}-р сарын аян → data{suffix}.json / draw_data{suffix}.json\n")
@@ -99,6 +205,13 @@ def convert(excel_path: str, month: int = 1) -> None:
         print(f"\n❌  Excel файл унших боломжгүй: {e}")
         sys.exit(1)
 
+    # ── Detect multi-sheet format (Data.xlsx style) ────────
+    sheet_names = wb.sheetnames
+    if 'Зээл сунгалт' in sheet_names and 'Хаасан зээл' in sheet_names:
+        process_multi_sheet(wb, month, base_dir)
+        return
+
+    # ── Single-sheet formats ───────────────────────────────
     ws = wb.active
     rows = list(ws.iter_rows(values_only=True))
     if not rows:
@@ -115,16 +228,15 @@ def convert(excel_path: str, month: int = 1) -> None:
     print(f"   Формат илэрлээ: {fmt_labels.get(fmt, fmt)}")
 
     # ── Build entries ──────────────────────────────────────
-    entries = []   # for draw_data.json  — one entry per ticket row
-    phone_counts = {}  # for data.json   — {phone: ticket_count}
+    entries = []
+    phone_counts = {}
     skipped = 0
 
     for row_idx, row in enumerate(rows[1:], start=2):
         if not any(row):
-            continue  # skip fully empty rows
+            continue
 
         if fmt == "tpay":
-            # Columns: Төрөл | Регистр | Овог | Нэр | Утасны дугаар
             töröl   = str(row[0]).strip() if row[0] else ""
             surname = str(row[2]).strip() if row[2] else ""
             name    = str(row[3]).strip() if row[3] else ""
@@ -160,22 +272,10 @@ def convert(excel_path: str, month: int = 1) -> None:
 
         if fmt == "tpay":
             for _ in range(tickets):
-                entries.append({
-                    "phone":   phone,
-                    "name":    name,
-                    "surname": surname,
-                    "kiosk":   "",
-                    "date":    ""
-                })
+                entries.append({"phone": phone, "name": name, "surname": surname, "kiosk": "", "date": ""})
             phone_counts[phone] = phone_counts.get(phone, 0) + tickets
         elif fmt == "new":
-            entries.append({
-                "phone":   phone,
-                "name":    name,
-                "surname": surname,
-                "kiosk":   kiosk,
-                "date":    loan_dt
-            })
+            entries.append({"phone": phone, "name": name, "surname": surname, "kiosk": kiosk, "date": loan_dt})
             phone_counts[phone] = phone_counts.get(phone, 0) + 1
         else:
             for _ in range(max(tickets, 1)):
@@ -183,40 +283,7 @@ def convert(excel_path: str, month: int = 1) -> None:
             phone_counts[phone] = phone_counts.get(phone, 0) + max(tickets, 1)
 
     wb.close()
-
-    total_tickets    = len(entries)
-    unique_phones    = len(phone_counts)
-    today            = str(date.today())
-
-    # ── Write dataN.json (for index.html lookup + stats) ──
-    data_json = {
-        "_updated": today,
-        "_note": f"convert.py --month {month} ашиглан үүсгэсэн.",
-    }
-    data_json.update(phone_counts)
-
-    data_json_path = os.path.join(base_dir, f"data{suffix}.json")
-    with open(data_json_path, "w", encoding="utf-8") as f:
-        json.dump(data_json, f, ensure_ascii=False, indent=2)
-
-    # ── Write draw_dataN.json (for draw.html) ─────────────
-    draw_json = {
-        "_updated": today,
-        "_total_tickets": total_tickets,
-        "_unique_phones": unique_phones,
-        "entries": entries
-    }
-    draw_json_path = os.path.join(base_dir, f"draw_data{suffix}.json")
-    with open(draw_json_path, "w", encoding="utf-8") as f:
-        json.dump(draw_json, f, ensure_ascii=False, indent=2)
-
-    print(f"✅  Амжилттай үүслээ")
-    print(f"   Нийт тасалбар:     {total_tickets}")
-    print(f"   Өвөрмөц харилцагч: {unique_phones}")
-    print(f"   Алгасав:           {skipped}")
-    print(f"   {data_json_path}")
-    print(f"   {draw_json_path}")
-    print()
+    write_output(entries, phone_counts, skipped, month, base_dir)
 
 
 if __name__ == "__main__":

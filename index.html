@@ -469,6 +469,11 @@
     .result-found h3 { font-size: 17px; font-weight: 800; color: #0a7a2e; margin-bottom: 4px; }
     .ticket-count { font-size: 52px; font-weight: 900; color: #0a7a2e; line-height: 1; margin: 6px 0 2px; }
     .ticket-label { font-size: 14px; font-weight: 600; color: #1a8a40; }
+    .result-months { display: flex; flex-direction: column; gap: 10px; margin: 12px 0 10px; }
+    .result-month-row { display: flex; align-items: center; gap: 10px; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 12px; padding: 10px 14px; }
+    .rm-badge { font-size: 12px; font-weight: 700; white-space: nowrap; }
+    .rm-count { font-size: 28px; font-weight: 900; color: #0a7a2e; line-height: 1; margin-left: auto; }
+    .rm-label { font-size: 12px; font-weight: 600; color: #166534; white-space: nowrap; }
     .phone-disp   { margin-top: 10px; font-size: 13px; color: #555; }
 
     .result-not-found {
@@ -937,9 +942,9 @@ function closeNav() {
           <div class="c-stat-desc">оролцогч оролцсон</div>
         </div>
         <div class="c-btns">
-          <a class="c-cta c-cta-solid" href="draw.html">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
-            Сугалааны тохирлын үр дүн харах
+          <a class="c-cta c-cta-solid" href="#winners">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M8.21 13.89L7 23l5-3 5 3-1.21-9.12"/><path d="M15 7a3 3 0 1 1-6 0 3 3 0 0 1 6 0z"/><path d="M12 2v1M4.22 4.22l.71.71M2 12h1M4.22 19.78l.71-.71M19.78 4.22l-.71.71M21 12h-1M19.78 19.78l-.71-.71"/></svg>
+            Азтан харилцагчдыг харах
           </a>
           <a class="c-cta c-cta-outline" href="https://www.facebook.com/TpayMNG/videos/2500280360437453" target="_blank">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
@@ -1418,15 +1423,34 @@ function closeNav() {
     btn.innerHTML = 'Шалгах';
     resultEl.style.display = 'block';
 
-    const entry = month2Data[phone];
-    if (entry !== undefined && entry !== null && entry !== 0 && entry !== '') {
-      const tickets = parseInt(entry) || entry;
+    const e2 = month2Data[phone];
+    const e1 = raffleData[phone];
+    const found2 = e2 !== undefined && e2 !== null && e2 !== 0 && e2 !== '';
+    const found1 = e1 !== undefined && e1 !== null && e1 !== 0 && e1 !== '';
+
+    if (found2 || found1) {
+      let rows = '';
+      if (found2) {
+        const t2 = parseInt(e2) || e2;
+        rows += `<div class="result-month-row">
+          <span class="rm-badge rm-blue">🔵 7-р сарын аян</span>
+          <span class="rm-count">${t2}</span>
+          <span class="rm-label">сугалааны эрх</span>
+        </div>`;
+      }
+      if (found1) {
+        const t1 = parseInt(e1) || e1;
+        rows += `<div class="result-month-row">
+          <span class="rm-badge rm-green">🟢 6-р сарын аян</span>
+          <span class="rm-count">${t1}</span>
+          <span class="rm-label">сугалааны эрх · аян дууссан</span>
+        </div>`;
+      }
       resultEl.innerHTML = `
         <div class="result-found" style="margin-top:16px;">
           <div class="r-icon">🎟️</div>
           <h3>Баяр хүргэе! Та сугалааны эрхтэй байна!</h3>
-          <div class="ticket-count">${tickets}</div>
-          <div class="ticket-label">сугалааны эрх</div>
+          <div class="result-months">${rows}</div>
           <div class="phone-disp">Бүртгэлтэй дугаар: <strong>${fmt(phone)}</strong></div>
         </div>`;
     } else {

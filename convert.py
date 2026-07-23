@@ -133,66 +133,132 @@ def write_output(entries, phone_counts, skipped, month, base_dir):
     print()
 
 
-def process_multi_sheet(wb, month, base_dir):
+def find_header_row(rows):
     """
-    Олон хуудас формат (Data.xlsx — Эргэн төлөлтийн аян):
-      'Зээл сунгалт' — 1 эрх, утас col[5], өгөгдөл 2-р мөрөөс
-      'Хаасан зээл'  — 2 эрх, утас col[5], өгөгдөл 3-р мөрөөс
+    Return (header_row_idx, phone_col_idx) by scanning for 'утас' in any row.
+    Returns (-1, -1) if not found.
     """
-    print(f"   Формат илэрлээ: Олон хуудас (Зээл сунгалт + Хаасан зээл)")
+    for i, row in enumerate(rows):
+        for j, cell in enumerate(row):
+            if cell and "утас" in str(cell).strip().lower():
+                return i, j
+    return -1, -1
+
+
+def process_sheet(ws, tickets_per_row, label):
+    """
+    Generic sheet processor: auto-detects header row and phone column.
+    Returns (entries, phone_counts, ok_count, skip_count).
+    """
+    rows = [r for r in ws.iter_rows(values_only=True)]
+    hdr_idx, phone_col = find_header_row(rows)
+    if hdr_idx == -1:
+        print(f"   ⚠️  [{label}] Толгой мөр олдсонгүй, алгасав.")
+        return [], {}, 0, 0
+
+    entries = []
+    phone_counts = {}
+    ok = skip = 0
+
+    # detect name/surname columns from header
+    hdr = [str(c).strip().lower() if c else "" for c in rows[hdr_idx]]
+    # овог = surname, нэр = name (last occurrence if multiple)
+    surname_col = next((j for j, h in enumerate(hdr) if "овог" in h), None)
+    name_col    = next((j for j, h in enumerate(hdr) if "нэр" in h and "регистр" not in h), None)
+
+    for row in rows[hdr_idx + 1:]:
+        if not any(row):
+            continue
+        phone = clean_phone(row[phone_col]) if phone_col < len(row) else None
+        if phone is None:
+            skip += 1
+            continue
+        surname = str(row[surname_col]).strip() if surname_col is not None and row[surname_col] else ""
+        name    = str(row[name_col]).strip()    if name_col    is not None and row[name_col]    else ""
+        for _ in range(tickets_per_row):
+            entries.append({"phone": phone, "name": name, "surname": surname, "kiosk": "", "date": ""})
+        phone_counts[phone] = phone_counts.get(phone, 0) + tickets_per_row
+        ok += 1
+
+    return entries, phone_counts, ok, skip
+
+
+def find_sheet(wb, keywords):
+    """Return first sheet whose name matches any keyword (case-insensitive)."""
+    for name in wb.sheetnames:
+        n = name.strip().lower()
+        if any(kw in n for kw in keywords):
+            return wb[name], name
+    return None, None
+
+
+def process_multi_sheet(wb, month, base_dir, merge=False):
+    """
+    Олон хуудас формат — сунгалт + хаасан зээл хуудас автоматаар илэрнэ.
+    Утасны багана болон толгой мөрийг динамикаар олно.
+    --merge флагтай бол одоогийн dataN.json дээр нэмнэ.
+    """
+    sun_ws, sun_name = find_sheet(wb, ["сунгалт", "sungalt", "зээл сунгалт"])
+    haa_ws, haa_name = find_sheet(wb, ["хаасан", "haasan"])
+
+    if sun_ws is None and haa_ws is None:
+        print("   ❌ Сунгалт/Хаасан хуудас олдсонгүй.")
+        wb.close()
+        return
+
+    print(f"   Формат илэрлээ: Олон хуудас ({sun_name or '—'} + {haa_name or '—'})")
 
     entries = []
     phone_counts = {}
     skipped = 0
 
-    # ── Sheet 1: Зээл сунгалт — 1 ticket each ───────────────
-    ws1 = wb['Зээл сунгалт']
-    rows1 = list(ws1.iter_rows(values_only=True))
-    # Row 0: blank, Row 1: headers, Row 2+: data
-    sun_ok = sun_skip = 0
-    for row in rows1[2:]:
-        if not any(row):
-            continue
-        surname = str(row[2]).strip() if row[2] else ""
-        name    = str(row[3]).strip() if row[3] else ""
-        phone   = clean_phone(row[5])
-        if phone is None:
-            skipped += 1
-            sun_skip += 1
-            continue
-        entries.append({"phone": phone, "name": name, "surname": surname, "kiosk": "", "date": ""})
-        phone_counts[phone] = phone_counts.get(phone, 0) + 1
-        sun_ok += 1
-    print(f"   Зээл сунгалт: {sun_ok} мөр (1 эрх) · {sun_skip} алгасав")
+    if sun_ws:
+        e, pc, ok, skip = process_sheet(sun_ws, 1, sun_name)
+        entries += e
+        for p, v in pc.items():
+            phone_counts[p] = phone_counts.get(p, 0) + v
+        skipped += skip
+        print(f"   {sun_name}: {ok} мөр (1 эрх) · {skip} алгасав")
 
-    # ── Sheet 2: Хаасан зээл — 2 tickets each ───────────────
-    ws2 = wb['Хаасан зээл']
-    rows2 = list(ws2.iter_rows(values_only=True))
-    # Row 0: blank, Row 1: blank, Row 2: headers, Row 3+: data
-    haa_ok = haa_skip = 0
-    for row in rows2[3:]:
-        if not any(row):
-            continue
-        surname = str(row[2]).strip() if row[2] else ""
-        name    = str(row[3]).strip() if row[3] else ""
-        phone   = clean_phone(row[5])
-        if phone is None:
-            skipped += 1
-            haa_skip += 1
-            continue
-        for _ in range(2):
-            entries.append({"phone": phone, "name": name, "surname": surname, "kiosk": "", "date": ""})
-        phone_counts[phone] = phone_counts.get(phone, 0) + 2
-        haa_ok += 1
-    print(f"   Хаасан зээл:  {haa_ok} мөр (2 эрх) · {haa_skip} алгасав")
+    if haa_ws:
+        e, pc, ok, skip = process_sheet(haa_ws, 2, haa_name)
+        entries += e
+        for p, v in pc.items():
+            phone_counts[p] = phone_counts.get(p, 0) + v
+        skipped += skip
+        print(f"   {haa_name}: {ok} мөр (2 эрх) · {skip} алгасав")
 
     wb.close()
+
+    # ── Merge with existing data if --merge ──────────────────
+    if merge:
+        suffix = "" if month == 1 else str(month)
+        existing_path = os.path.join(base_dir, f"data{suffix}.json")
+        if os.path.exists(existing_path):
+            with open(existing_path, encoding="utf-8") as f:
+                existing = json.load(f)
+            added = len(phone_counts)
+            for p, v in existing.items():
+                if p.startswith("_"):
+                    continue
+                phone_counts[p] = phone_counts.get(p, 0) + v
+            # Also merge draw entries
+            draw_path = os.path.join(base_dir, f"draw_data{suffix}.json")
+            if os.path.exists(draw_path):
+                with open(draw_path, encoding="utf-8") as f:
+                    existing_draw = json.load(f)
+                entries = existing_draw.get("entries", []) + entries
+            print(f"   + Нэмэлт: {added} өвөрмөц дугаар одоогийн өгөгдөлд нэмэгдлээ")
+        else:
+            print(f"   ⚠️  {existing_path} олдсонгүй — шинэ файл үүсгэнэ")
+
     write_output(entries, phone_counts, skipped, month, base_dir)
 
 
-def convert(excel_path: str, month: int = 1) -> None:
+def convert(excel_path: str, month: int = 1, merge: bool = False) -> None:
     suffix = "" if month == 1 else str(month)
-    print(f"\n📋 {month}-р сарын аян → data{suffix}.json / draw_data{suffix}.json\n")
+    mode = "нэмэлт (merge)" if merge else "шинэ"
+    print(f"\n📋 {month}-р сарын аян [{mode}] → data{suffix}.json / draw_data{suffix}.json\n")
     if not os.path.exists(excel_path):
         print(f"Файл олдсонгүй: {excel_path}")
         sys.exit(1)
@@ -205,10 +271,13 @@ def convert(excel_path: str, month: int = 1) -> None:
         print(f"\n❌  Excel файл унших боломжгүй: {e}")
         sys.exit(1)
 
-    # ── Detect multi-sheet format (Data.xlsx style) ────────
-    sheet_names = wb.sheetnames
-    if 'Зээл сунгалт' in sheet_names and 'Хаасан зээл' in sheet_names:
-        process_multi_sheet(wb, month, base_dir)
+    # ── Detect multi-sheet format ─────────────────────────
+    # Matches: Data.xlsx (Зээл сунгалт/Хаасан зээл) AND daily files (sungalt/haasan/Сунгалт/etc.)
+    sheet_names_lower = [s.strip().lower() for s in wb.sheetnames]
+    has_sun = any("сунгалт" in s or "sungalt" in s for s in sheet_names_lower)
+    has_haa = any("хаасан" in s or "haasan" in s for s in sheet_names_lower)
+    if has_sun or has_haa:
+        process_multi_sheet(wb, month, base_dir, merge=merge)
         return
 
     # ── Single-sheet formats ───────────────────────────────
@@ -289,13 +358,16 @@ def convert(excel_path: str, month: int = 1) -> None:
 if __name__ == "__main__":
     args = [a for a in sys.argv[1:] if not a.startswith("--")]
     month_arg = 1
+    merge_arg = False
     for i, a in enumerate(sys.argv[1:]):
         if a == "--month" and i + 2 < len(sys.argv):
             try:
                 month_arg = int(sys.argv[i + 2])
             except ValueError:
                 pass
+        if a == "--merge":
+            merge_arg = True
     if not args:
         print(__doc__)
         sys.exit(0)
-    convert(args[0], month=month_arg)
+    convert(args[0], month=month_arg, merge=merge_arg)

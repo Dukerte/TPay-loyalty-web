@@ -145,10 +145,11 @@ def find_header_row(rows):
     return -1, -1
 
 
-def process_sheet(ws, tickets_per_row, label):
+def process_sheet(ws, tickets_per_row, label, source=""):
     """
     Generic sheet processor: auto-detects header row and phone column.
     Returns (entries, phone_counts, ok_count, skip_count).
+    source: optional tag added to each entry (e.g. "sungalt" or "haagdsan")
     """
     rows = [r for r in ws.iter_rows(values_only=True)]
     hdr_idx, phone_col = find_header_row(rows)
@@ -176,7 +177,10 @@ def process_sheet(ws, tickets_per_row, label):
         surname = str(row[surname_col]).strip() if surname_col is not None and row[surname_col] else ""
         name    = str(row[name_col]).strip()    if name_col    is not None and row[name_col]    else ""
         for _ in range(tickets_per_row):
-            entries.append({"phone": phone, "name": name, "surname": surname, "kiosk": "", "date": ""})
+            entry = {"phone": phone, "name": name, "surname": surname, "kiosk": "", "date": ""}
+            if source:
+                entry["source"] = source
+            entries.append(entry)
         phone_counts[phone] = phone_counts.get(phone, 0) + tickets_per_row
         ok += 1
 
@@ -199,7 +203,7 @@ def process_multi_sheet(wb, month, base_dir, merge=False):
     --merge флагтай бол одоогийн dataN.json дээр нэмнэ.
     """
     sun_ws, sun_name = find_sheet(wb, ["сунгалт", "sungalt", "зээл сунгалт"])
-    haa_ws, haa_name = find_sheet(wb, ["хаасан", "haasan"])
+    haa_ws, haa_name = find_sheet(wb, ["хаасан", "haasan", "haagdsan"])
 
     if sun_ws is None and haa_ws is None:
         print("   ❌ Сунгалт/Хаасан хуудас олдсонгүй.")
@@ -213,7 +217,7 @@ def process_multi_sheet(wb, month, base_dir, merge=False):
     skipped = 0
 
     if sun_ws:
-        e, pc, ok, skip = process_sheet(sun_ws, 1, sun_name)
+        e, pc, ok, skip = process_sheet(sun_ws, 1, sun_name, source="sungalt")
         entries += e
         for p, v in pc.items():
             phone_counts[p] = phone_counts.get(p, 0) + v
@@ -221,7 +225,7 @@ def process_multi_sheet(wb, month, base_dir, merge=False):
         print(f"   {sun_name}: {ok} мөр (1 эрх) · {skip} алгасав")
 
     if haa_ws:
-        e, pc, ok, skip = process_sheet(haa_ws, 2, haa_name)
+        e, pc, ok, skip = process_sheet(haa_ws, 2, haa_name, source="haagdsan")
         entries += e
         for p, v in pc.items():
             phone_counts[p] = phone_counts.get(p, 0) + v

@@ -1099,9 +1099,8 @@ let phoneHaagdsan = {}; // phone → haagdsan (closure) count
 const STORAGE_KEY = 'tpay_draw2_state'; // separate from June draw
 
 function saveState() {
-  const drawnPhones = pool
-    .filter(e => !remaining.some(r => r.phone === e.phone && r.date === e.date))
-    .map(e => e.phone + '|' + (e.date || ''));
+  const remainingPhones = new Set(remaining.map(e => e.phone));
+  const drawnPhones = [...new Set(pool.map(e => e.phone))].filter(p => !remainingPhones.has(p));
   localStorage.setItem(STORAGE_KEY, JSON.stringify({
     winners,
     prizeRemaining,
@@ -1125,10 +1124,10 @@ function restoreState() {
       if (found) selectedPrize = found;
     }
 
-    // restore remaining pool (remove already-drawn)
+    // restore remaining pool (exclude all entries for winner phones)
     if (s.drawnPhones && s.drawnPhones.length > 0) {
       const drawnSet = new Set(s.drawnPhones);
-      remaining = pool.filter(e => !drawnSet.has(e.phone + '|' + (e.date || '')));
+      remaining = pool.filter(e => !drawnSet.has(e.phone));
     }
 
     // restore winners log
@@ -1140,7 +1139,8 @@ function restoreState() {
       winners.forEach((w, i) => {
         const ph  = w._display || maskPhone(w.phone);
         const per = w._person  || nameInitial(w);
-        addLog(ph, per, phoneTickets[w.phone] || w.ticketCount || 1, pool.length, w.prize, i + 1, w.nonce);
+        const fn  = [w.surname, w.name].filter(Boolean).join(' ');
+        addLog(ph, per, phoneTickets[w.phone] || w.ticketCount || 1, pool.length, w.prize, i + 1, w.nonce, fn);
       });
     }
 
@@ -1306,7 +1306,8 @@ function startDraw() {
 }
 
 function finalize(entry, idx, nonce) {
-  remaining.splice(idx, 1);
+  // Remove ALL entries for this phone (winner is fully excluded from future draws)
+  remaining = remaining.filter(e => e.phone !== entry.phone);
   const masked  = maskPhone(entry.phone);
   const initial = nameInitial(entry);
   const prize   = selectedPrize;
@@ -1322,7 +1323,8 @@ function finalize(entry, idx, nonce) {
     showOverlay(masked, initial, ticketCount, pool.length, prize.label, entry.phone);
     launchConfetti();
     playWinFanfare();
-    addLog(masked, initial, ticketCount, pool.length, prize.label, winners.length + 1, nonce);
+    const fullName = [entry.surname, entry.name].filter(Boolean).join(' ');
+    addLog(masked, initial, ticketCount, pool.length, prize.label, winners.length + 1, nonce, fullName);
     winners.push({ ...entry, prize: prize.label, nonce, ticketCount });
     saveState();
   }, 300);
@@ -1351,8 +1353,13 @@ function showOverlay(phone, person, ticketCount, poolTotal, prizeLabel, rawPhone
     sourceHtml = `<div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-top:2px;font-size:13px;color:rgba(255,255,255,0.7)">${parts.join('')}</div>`;
   }
 
-  document.getElementById('ovTickets').innerHTML  =
-    `🎟️ <strong>${ticketCount}</strong> сугалааны эрхтэй байсан${sourceHtml ? '<br>' + sourceHtml : ''}`;
+  const leftover = ticketCount - 1;
+  document.getElementById('ovTickets').innerHTML =
+    `<div style="display:flex;flex-direction:column;gap:4px;align-items:center">
+      <div style="font-size:14px;color:rgba(255,255,255,0.6)">Нийт сугалааны эрх: <strong style="color:#fff">${ticketCount}</strong></div>
+      ${leftover > 0 ? `<div style="font-size:13px;color:rgba(255,255,255,0.45)">Үлдсэн сугалааны эрх: <strong style="color:rgba(255,255,255,0.65)">${ticketCount}-1 = ${leftover}</strong></div>` : ''}
+      ${sourceHtml}
+    </div>`;
   document.getElementById('ovPoolInfo').innerHTML =
     `📊 Нийт ${poolTotal.toLocaleString()} эрхийн дундаас`;
   document.getElementById('ovPrize').textContent  = prizeLabel;
@@ -1362,7 +1369,7 @@ function closeOverlay() { document.getElementById('overlay').classList.remove('s
 document.getElementById('overlay').addEventListener('click', e => { if(e.target===document.getElementById('overlay')) closeOverlay(); });
 
 // ── LOG ───────────────────────────────────────────────────
-function addLog(phone, person, ticketCount, poolTotal, prizeLabel, rank, nonce) {
+function addLog(phone, person, ticketCount, poolTotal, prizeLabel, rank, nonce, fullName) {
   document.getElementById('emptyState')?.remove();
   const list = document.getElementById('logList');
   const now  = new Date();
@@ -1370,11 +1377,12 @@ function addLog(phone, person, ticketCount, poolTotal, prizeLabel, rank, nonce) 
   const rc   = rank===1?'gold':rank===2?'silver':rank===3?'bronze':'';
   const row  = document.createElement('div');
   row.className = 'log-row';
+  const nameDisplay = fullName ? `<span style="color:rgba(255,255,255,0.85)">${fullName}</span>` : (person || '');
   row.innerHTML = `
     <div class="log-rank ${rc}">${rank}</div>
     <div class="log-info">
       <div class="log-phone">${phone}</div>
-      <div class="log-name">${person || ''} · 🎟️ ${ticketCount} эрхтэй байсан</div>
+      <div class="log-name">${nameDisplay} · Нийт эрх: ${ticketCount}${ticketCount > 1 ? `, Үлдсэн эрх: ${ticketCount - 1}` : ''}</div>
       ${nonce ? `<div class="log-nonce">🔐 #${nonce} · ${time}</div>` : ''}
     </div>
     <div class="log-right">

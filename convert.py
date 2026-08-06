@@ -85,16 +85,29 @@ def fmt_date(raw):
 
 def detect_format(headers):
     """
-    'tpay' — TPay системийн шууд экспорт: Төрөл | Регистр | Овог | Нэр | Утас
-    'new'  — гараар бэлдсэн 5 багана:     Нэр | Овог | Утас | Киоск | Огноо
-    'old'  — хуучин 2 багана:              Утас | Тикет тоо
+    'tpay'  — TPay системийн шууд экспорт: Төрөл | Регистр | Овог | Нэр | Утас
+    'auto'  — Харилцагч prefix бүхий динамик толгой: Харилцагч нэр/овог/утас/огноо
+    'new'   — гараар бэлдсэн 5 багана:     Нэр | Овог | Утас | Киоск | Огноо
+    'old'   — хуучин 2 багана:              Утас | Тикет тоо
     """
     h = [str(x).strip().lower() if x else "" for x in headers]
     if any("төрөл" in x for x in h):
         return "tpay"
+    # 'auto': headers contain "харилцагч" prefix (e.g. "Харилцагч утас")
+    if any("харилцагч" in x for x in h):
+        return "auto"
     if any("нэр" in x or "овог" in x for x in h):
         return "new"
     return "old"
+
+
+def find_col(headers, keywords):
+    """Return first column index whose header contains any of the keywords."""
+    h = [str(x).strip().lower() if x else "" for x in headers]
+    for i, cell in enumerate(h):
+        if any(kw in cell for kw in keywords):
+            return i
+    return None
 
 
 def write_output(entries, phone_counts, skipped, month, base_dir):
@@ -295,10 +308,20 @@ def convert(excel_path: str, month: int = 1, merge: bool = False) -> None:
     fmt = detect_format(headers)
     fmt_labels = {
         'tpay': 'TPay экспорт (Төрөл|Регистр|Овог|Нэр|Утас) — Сунгалт=1эрх, Хаасан=2эрх',
+        'auto': 'Харилцагч формат (динамик баганын илрүүлэлт)',
         'new':  '5 багана (Нэр|Овог|Утас|Киоск|Огноо)',
         'old':  '2 багана (Утас|Тикет тоо)',
     }
     print(f"   Формат илэрлээ: {fmt_labels.get(fmt, fmt)}")
+
+    # For 'auto' format, detect column indices from header
+    hdr = rows[0]
+    auto_phone_col   = find_col(hdr, ["утас"])
+    auto_name_col    = find_col(hdr, ["нэр"])
+    auto_surname_col = find_col(hdr, ["овог"])
+    auto_date_col    = find_col(hdr, ["огноо"])
+    if fmt == "auto":
+        print(f"   Баганын индекс → утас:{auto_phone_col} нэр:{auto_name_col} овог:{auto_surname_col} огноо:{auto_date_col}")
 
     # ── Build entries ──────────────────────────────────────
     entries = []
@@ -321,6 +344,12 @@ def convert(excel_path: str, month: int = 1, merge: bool = False) -> None:
             else:
                 skipped += 1
                 continue
+        elif fmt == "auto":
+            phone   = clean_phone(row[auto_phone_col])   if auto_phone_col   is not None and auto_phone_col   < len(row) else None
+            name    = str(row[auto_name_col]).strip()    if auto_name_col    is not None and auto_name_col    < len(row) and row[auto_name_col]    else ""
+            surname = str(row[auto_surname_col]).strip() if auto_surname_col is not None and auto_surname_col < len(row) and row[auto_surname_col] else ""
+            loan_dt = fmt_date(row[auto_date_col])       if auto_date_col    is not None and auto_date_col    < len(row) else ""
+            tickets = 1
         elif fmt == "new":
             name    = str(row[0]).strip() if row[0] else ""
             surname = str(row[1]).strip() if row[1] else ""
@@ -347,8 +376,8 @@ def convert(excel_path: str, month: int = 1, merge: bool = False) -> None:
             for _ in range(tickets):
                 entries.append({"phone": phone, "name": name, "surname": surname, "kiosk": "", "date": ""})
             phone_counts[phone] = phone_counts.get(phone, 0) + tickets
-        elif fmt == "new":
-            entries.append({"phone": phone, "name": name, "surname": surname, "kiosk": kiosk, "date": loan_dt})
+        elif fmt in ("new", "auto"):
+            entries.append({"phone": phone, "name": name, "surname": surname, "kiosk": kiosk if fmt == "new" else "", "date": loan_dt})
             phone_counts[phone] = phone_counts.get(phone, 0) + 1
         else:
             for _ in range(max(tickets, 1)):
